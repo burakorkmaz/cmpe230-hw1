@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 
@@ -110,7 +111,6 @@ void addItem(Person p, char *item, int quantity) {
 
 void buy(char *name[], char *items[], int quantity[]) {
     int numPeople = sizeof(personList) / sizeof(personList[0]);
-
     for (int i = 0; i < numPeople; i++) {
         for (int j = 0; j < personCount; j++) {
             if (strcmp(name[i], personList[j].name) == 0) {
@@ -202,9 +202,30 @@ char **parsing(char *tokens[], int numTokens) {
     
     char *sentence = "";
 
-    while (tokenIndex < numTokens) {
-        if (strcmp(tokens[tokenIndex], "buy") == 0) {
+    if (numTokens == 1 && strcmp(tokens[0], "exit") == 0) {
+        sentences[0] = "exit";
+        exit(0);
+    }
 
+    // ali and burak buy 2 apple
+    // ali and burak buy 2 apple and 3 bread and water and bora 
+    // ali and burak buy 2 apple and 3 bread from efe and bora sell 2 ring
+    while (tokenIndex < numTokens) {
+        sentence = strcat(strcat(sentence, " "), tokens[tokenIndex]);
+
+        if (strcmp(tokens[tokenIndex], "buy") == 0) {
+            if (!isNumeric(tokens[++tokenIndex])) {
+                printf("INVALID");
+                break;
+            }   
+            sentence = strcat(strcat(sentence, " "), tokens[tokenIndex++]); // add the quantity
+                                                                            
+            while (strcmp(tokens[tokenIndex], "and") != 0 || isNumeric(tokens[tokenIndex + 1])) {
+                sentence = strcat(strcat(sentence, " "), tokens[tokenIndex++]); // add the item
+            }
+            tokenIndex++; // skip the "and"
+            sentences[sentenceIndex++] = sentence;
+            sentence = "";
         }
         
         else if (strcmp(tokens[tokenIndex], "sell") == 0) {
@@ -214,11 +235,7 @@ char **parsing(char *tokens[], int numTokens) {
         else if (strcmp(tokens[tokenIndex], "go") == 0) {
         
         }
-
-        else {
-            sentence = strcat(sentence, tokens[tokenIndex]);
-            tokenIndex++;
-        }
+        tokenIndex++;
     }
 
     return sentences;
