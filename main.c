@@ -4,6 +4,7 @@ void readTerminal(char *buffer, int size);
 void tokenize(char *buffer, char *delim, char **tokens, int *numTokens);
 void findKeyword(char *token);
 void findAction(char *tokens[], int *start, int *nextStart, int *actionIndex, int numTokens);
+char **parsing(char *tokens[], int numTokens);
 
 int start = 0;
 int actionIndex = 0;
@@ -19,24 +20,11 @@ int main() {
     int numTokens;
     tokenize(buffer, " ", tokens, &numTokens);
 
-    /*
-    printf("Token: ");
-    for (int i = 0; i < numTokens; i++) {
-        printf("%s ", tokens[i]);
+    char **parsedTokens = parsing(tokens, numTokens); 
+
+    for (int i = 0; i < 2; i++) {
+        printf("%s\n", parsedTokens[i]);
     }
-    printf("\n");
-    */
-
-    while (nextStart < numTokens) {
-        findAction(tokens, &start, &nextStart, &actionIndex, numTokens);
-        //start = nextStart;
-    }
-
-    printf("Start: %d\n", start);
-    printf("Action Index: %d\n", actionIndex);
-    printf("Next Start: %d\n", nextStart);
-
-    //printf("Number of tokens: %d\n", numTokens);
 
     return 0;
 }

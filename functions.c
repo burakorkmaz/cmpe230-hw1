@@ -196,11 +196,12 @@ bool isNumeric(const char *str) {
 }
 
 char **parsing(char *tokens[], int numTokens) {
-    char *sentences[1024];
+    static char *sentences[1024];
     int sentenceIndex = 0;
     int tokenIndex = 0;
     
-    char *sentence = "";
+    char *sentence;
+    strcpy(sentence, "");
 
     if (numTokens == 1 && strcmp(tokens[0], "exit") == 0) {
         sentences[0] = "exit";
@@ -211,17 +212,17 @@ char **parsing(char *tokens[], int numTokens) {
     // ali and burak buy 2 apple and 3 bread and water and bora 
     // ali and burak buy 2 apple and 3 bread from efe and bora sell 2 ring
     while (tokenIndex < numTokens) {
-        sentence = strcat(strcat(sentence, " "), tokens[tokenIndex]);
+        strcpy(sentence, strcat(strcat(sentence, " "), tokens[tokenIndex]));
 
         if (strcmp(tokens[tokenIndex], "buy") == 0) {
             if (!isNumeric(tokens[++tokenIndex])) {
                 printf("INVALID");
                 break;
             }   
-            sentence = strcat(strcat(sentence, " "), tokens[tokenIndex++]); // add the quantity
+            strcpy(sentence, strcat(strcat(sentence, " "), tokens[tokenIndex]));
                                                                             
             while (strcmp(tokens[tokenIndex], "and") != 0 || isNumeric(tokens[tokenIndex + 1])) {
-                sentence = strcat(strcat(sentence, " "), tokens[tokenIndex++]); // add the item
+                strcpy(sentence, strcat(strcat(sentence, " "), tokens[tokenIndex]));
             }
             tokenIndex++; // skip the "and"
             sentences[sentenceIndex++] = sentence;
