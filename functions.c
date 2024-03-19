@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 int personCount = 0;
 
@@ -132,3 +133,94 @@ void buy(char *name[], char *items[], int quantity[]) {
         }
     }
 }
+
+// CHECK THIS FUNCTION
+void sell(char *name[], char *items[], int quantity[]) {
+    int numPeople = sizeof(personList) / sizeof(personList[0]);
+
+    for (int i = 0; i < numPeople; i++) {
+        for (int j = 0; j < personCount; j++) {
+            if (strcmp(name[i], personList[j].name) == 0) {
+                for (int k = 0; k < personList[j].numItems; k++) {
+                    if (strcmp(items[i], personList[j].items[k].name) == 0) {
+                        personList[j].items[k].quantity -= quantity[i];
+                        return;
+                    }
+                    else {
+                        addItem(personList[j], items[i], quantity[i]);
+                        return;
+                    }
+                }
+            }
+            else {
+                createPerson(&personList[personCount], name[i]);
+                addItem(personList[personCount - 1], items[i], quantity[i]);
+                return;
+            }
+        }
+    }
+}
+
+// CHECK THIS FUNCTION
+void go(char *name[], char *location[]) {
+    int numPeople = sizeof(personList) / sizeof(personList[0]);
+
+    for (int i = 0; i < numPeople; i++) {
+        for (int j = 0; j < personCount; j++) {
+            if (strcmp(name[i], personList[j].name) == 0) {
+                changeLocation(&personList[j], location[i]);
+                return;
+            }
+            else {
+                createPerson(&personList[personCount], name[i]);
+                changeLocation(&personList[personCount - 1], location[i]);
+                return;
+            }
+        }
+    }
+}
+
+// Function to check if a string is numerical
+bool isNumeric(const char *str) {
+    if (str == NULL || *str == '\0') {
+        return false;
+    }
+
+    while (*str != '\0') {
+        if (*str < '0' || *str > '9') {
+            return false;         }
+        str++; 
+    }
+
+    return true; 
+}
+
+char **parsing(char *tokens[], int numTokens) {
+    char *sentences[1024];
+    int sentenceIndex = 0;
+    int tokenIndex = 0;
+    
+    char *sentence = "";
+
+    while (tokenIndex < numTokens) {
+        if (strcmp(tokens[tokenIndex], "buy") == 0) {
+
+        }
+        
+        else if (strcmp(tokens[tokenIndex], "sell") == 0) {
+        
+        }
+
+        else if (strcmp(tokens[tokenIndex], "go") == 0) {
+        
+        }
+
+        else {
+            sentence = strcat(sentence, tokens[tokenIndex]);
+            tokenIndex++;
+        }
+    }
+
+    return sentences;
+}
+
