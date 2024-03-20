@@ -196,49 +196,62 @@ bool isNumeric(const char *str) {
 }
 
 char **parsing(char *tokens[], int numTokens) {
-    static char *sentences[1024];
+    char **sentences = malloc(sizeof(char *) * 1024);
+    if (sentences == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
     int sentenceIndex = 0;
     int tokenIndex = 0;
-    
-    char *sentence;
-    strcpy(sentence, "");
+
+    char *sentence = malloc(sizeof(char) * 1025);
+    if (sentence == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
+    sentence[0] = '\0'; // Initialize sentence
 
     if (numTokens == 1 && strcmp(tokens[0], "exit") == 0) {
-        sentences[0] = "exit";
+        sentences[0] = strdup("exit"); // Allocate memory and copy string
+        if (sentences[0] == NULL) {
+            fprintf(stderr, "Memory allocation failed\n");
+            exit(EXIT_FAILURE);
+        }
         exit(0);
     }
-
-    // ali and burak buy 2 apple
-    // ali and burak buy 2 apple and 3 bread and water and bora 
-    // ali and burak buy 2 apple and 3 bread from efe and bora sell 2 ring
+    //burak and ali buy 4 apple and 2 banana
     while (tokenIndex < numTokens) {
-        strcpy(sentence, strcat(strcat(sentence, " "), tokens[tokenIndex]));
+        strcat(sentence, tokens[tokenIndex]);
+        strcat(sentence, " ");
 
         if (strcmp(tokens[tokenIndex], "buy") == 0) {
-            if (!isNumeric(tokens[++tokenIndex])) {
+            tokenIndex++; // Move to the next token
+            if (!isNumeric(tokens[tokenIndex])) {
                 printf("INVALID");
                 break;
-            }   
-            strcpy(sentence, strcat(strcat(sentence, " "), tokens[tokenIndex]));
-                                                                            
-            while (strcmp(tokens[tokenIndex], "and") != 0 || isNumeric(tokens[tokenIndex + 1])) {
-                strcpy(sentence, strcat(strcat(sentence, " "), tokens[tokenIndex]));
             }
-            tokenIndex++; // skip the "and"
-            sentences[sentenceIndex++] = sentence;
-            sentence = "";
-        }
-        
-        else if (strcmp(tokens[tokenIndex], "sell") == 0) {
-        
-        }
 
-        else if (strcmp(tokens[tokenIndex], "go") == 0) {
-        
+            strcat(sentence, tokens[tokenIndex]);
+            strcat(sentence, " ");
+
+            // Check for additional items to buy
+            while ( (tokenIndex + 1 < numTokens) &&
+                    ( (strcmp(tokens[tokenIndex], "and") != 0 || isNumeric(tokens[tokenIndex + 1]))) ) {
+                tokenIndex++;
+                strcat(sentence, tokens[tokenIndex]);
+                strcat(sentence, " ");
+            }
+            sentences[sentenceIndex++] = strdup(sentence); // Allocate memory and copy string
+            if (sentences[sentenceIndex - 1] == NULL) {
+                fprintf(stderr, "Memory allocation failed\n");
+                exit(EXIT_FAILURE);
+            }
+            sentence[0] = '\0'; // Reset sentence for the next iteration
         }
-        tokenIndex++;
+        tokenIndex++; // Move to the next token
     }
 
+
+    free(sentence); // Free dynamically allocated memory for sentence
     return sentences;
 }
-

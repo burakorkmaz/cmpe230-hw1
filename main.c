@@ -13,16 +13,18 @@ int nextStart = 0;
 int main() {
     char buffer[1025];
     readTerminal(buffer, 1025);
-    //printf("%s\n", buffer);
+
 
     // print the tokenized buffer
     char *tokens[100];
     int numTokens;
     tokenize(buffer, " ", tokens, &numTokens);
 
-    char **parsedTokens = parsing(tokens, numTokens); 
 
-    for (int i = 0; i < 2; i++) {
+    char **parsedTokens = parsing(tokens, numTokens);
+
+
+    for (int i = 0; parsedTokens[i] != NULL; i++) {
         printf("%s\n", parsedTokens[i]);
     }
 
