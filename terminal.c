@@ -4,6 +4,7 @@
 void readTerminal(char *buffer, int size) {
     printf(">> ");
     scanf("%[^\n]", buffer);
+    // fgets(buffer, size, stdin);
 }
 
 void tokenize(char *buffer, char *delim, char **tokens, int *numTokens) {
