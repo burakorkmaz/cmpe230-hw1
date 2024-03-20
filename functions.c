@@ -222,6 +222,7 @@ char **parsing(char *tokens[], int numTokens) {
         strcat(sentence, tokens[tokenIndex]);
         strcat(sentence, " ");
 
+        // ali buy 2 bread if burak has 3 bread
         if (strcmp(tokens[tokenIndex], "buy") == 0 || strcmp(tokens[tokenIndex], "sell") == 0) {
             tokenIndex++; // Move to the next token
             if (!isNumeric(tokens[tokenIndex])) {
@@ -278,6 +279,11 @@ char **parsing(char *tokens[], int numTokens) {
                 exit(EXIT_FAILURE);
             }
             sentence[0] = '\0'; // Reset sentence for the next iteration
+        }
+
+        else if (strcmp(tokens[tokenIndex], "if") == 0) {
+            tokenIndex++; 
+
         }
 
         tokenIndex++; // Move to the next token
