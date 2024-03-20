@@ -238,6 +238,32 @@ char **parsing(char *tokens[], int numTokens) {
             while ( (tokenIndex + 1 < numTokens) &&
                     ( (strcmp(tokens[tokenIndex], "and") != 0 || isNumeric(tokens[tokenIndex + 1]))) ) {
                 tokenIndex++;
+                if(strcmp(tokens[tokenIndex], "and") != 0) {
+                    strcat(sentence, tokens[tokenIndex]);
+                    strcat(sentence, " ");
+                }
+            }
+            sentences[sentenceIndex++] = strdup(sentence); // Allocate memory and copy string
+            if (sentences[sentenceIndex - 1] == NULL) {
+                fprintf(stderr, "Memory allocation failed\n");
+                exit(EXIT_FAILURE);
+            }
+            sentence[0] = '\0'; // Reset sentence for the next iteration
+        }
+        else if (strcmp(tokens[tokenIndex], "sell") == 0) {
+            tokenIndex++; // Move to the next token
+            if (!isNumeric(tokens[tokenIndex])) {
+                printf("INVALID");
+                break;
+            }
+
+            strcat(sentence, tokens[tokenIndex]);
+            strcat(sentence, " ");
+
+            // Check for additional items to buy
+            while ( (tokenIndex + 1 < numTokens) &&
+                    ( (strcmp(tokens[tokenIndex], "and") != 0 || isNumeric(tokens[tokenIndex + 1]))) ) {
+                tokenIndex++;
                 strcat(sentence, tokens[tokenIndex]);
                 strcat(sentence, " ");
             }
@@ -248,6 +274,7 @@ char **parsing(char *tokens[], int numTokens) {
             }
             sentence[0] = '\0'; // Reset sentence for the next iteration
         }
+
         tokenIndex++; // Move to the next token
     }
 
