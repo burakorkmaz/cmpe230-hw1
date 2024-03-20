@@ -6,8 +6,6 @@
 int personCount = 0;
 
 char *keywords[] = {
-    "sell",
-    "buy", 
     "go", 
     "to", 
     "from", 
@@ -219,15 +217,15 @@ char **parsing(char *tokens[], int numTokens) {
         }
         exit(0);
     }
-    //burak and ali buy 4 apple and 2 banana
+    
     while (tokenIndex < numTokens) {
         strcat(sentence, tokens[tokenIndex]);
         strcat(sentence, " ");
 
-        if (strcmp(tokens[tokenIndex], "buy") == 0) {
+        if (strcmp(tokens[tokenIndex], "buy") == 0 || strcmp(tokens[tokenIndex], "sell") == 0) {
             tokenIndex++; // Move to the next token
             if (!isNumeric(tokens[tokenIndex])) {
-                printf("INVALID");
+                printf("INVALID\n");
                 break;
             }
 
@@ -235,8 +233,8 @@ char **parsing(char *tokens[], int numTokens) {
             strcat(sentence, " ");
 
             // Check for additional items to buy
-            while ( (tokenIndex + 1 < numTokens) &&
-                    ( (strcmp(tokens[tokenIndex], "and") != 0 || isNumeric(tokens[tokenIndex + 1]))) ) {
+            while ((tokenIndex + 1 < numTokens) &&
+                    ((strcmp(tokens[tokenIndex], "and") != 0 || isNumeric(tokens[tokenIndex + 1])))) {
                 tokenIndex++;
                 if(strcmp(tokens[tokenIndex], "and") != 0) {
                     strcat(sentence, tokens[tokenIndex]);
@@ -250,23 +248,30 @@ char **parsing(char *tokens[], int numTokens) {
             }
             sentence[0] = '\0'; // Reset sentence for the next iteration
         }
-        else if (strcmp(tokens[tokenIndex], "sell") == 0) {
+
+        // ali go to ist
+        else if (strcmp(tokens[tokenIndex], "go") == 0) {
             tokenIndex++; // Move to the next token
-            if (!isNumeric(tokens[tokenIndex])) {
-                printf("INVALID");
+
+            if (strcmp(tokens[tokenIndex], "to") != 0) {
+                printf("INVALID\n");
                 break;
             }
 
-            strcat(sentence, tokens[tokenIndex]);
+            // Add "to" to sentence
+            strcat(sentence, tokens[tokenIndex++]);
             strcat(sentence, " ");
 
-            // Check for additional items to buy
-            while ( (tokenIndex + 1 < numTokens) &&
-                    ( (strcmp(tokens[tokenIndex], "and") != 0 || isNumeric(tokens[tokenIndex + 1]))) ) {
-                tokenIndex++;
-                strcat(sentence, tokens[tokenIndex]);
-                strcat(sentence, " ");
+            // Add location to sentence
+            strcat(sentence, tokens[tokenIndex]);
+            strcat(sentence, " ");
+            
+            if (tokenIndex + 1 < numTokens) {
+                if (strcmp(tokens[tokenIndex + 1], "and") == 0) {
+                    tokenIndex++;
+                }
             }
+            
             sentences[sentenceIndex++] = strdup(sentence); // Allocate memory and copy string
             if (sentences[sentenceIndex - 1] == NULL) {
                 fprintf(stderr, "Memory allocation failed\n");
@@ -277,7 +282,6 @@ char **parsing(char *tokens[], int numTokens) {
 
         tokenIndex++; // Move to the next token
     }
-
 
     free(sentence); // Free dynamically allocated memory for sentence
     return sentences;
