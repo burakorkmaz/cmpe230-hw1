@@ -346,7 +346,12 @@ char **parsing(char *tokens[], int numTokens) {
                     tokenIndex++;
                 }
             }
-            tokenIndex++;
+            sentences[sentenceIndex++] = strdup(sentence); // Allocate memory and copy string
+            if (sentences[sentenceIndex - 1] == NULL) {
+                fprintf(stderr, "Memory allocation failed\n");
+                exit(EXIT_FAILURE);
+            }
+            sentence[0] = '\0'; // Reset sentence for the next iteration
         }
 
         tokenIndex++; // Move to the next token
