@@ -6,6 +6,8 @@
 int personCount = 0;
 
 char *keywords[] = {
+    "buy",
+    "sell",
     "go", 
     "to", 
     "from", 
@@ -25,9 +27,18 @@ char *keywords[] = {
     "NOWHERE"
 };
 
+char *conditionWords[] = {
+    "has",
+    "at"
+    //"less", 
+    //"more", 
+    //"than"
+};
+
 char *actions[] = {
     "sell",
     "buy", 
+    "go"
 };
 
 /*
@@ -193,6 +204,26 @@ bool isNumeric(const char *str) {
     return true; 
 }
 
+// to check if the word is a conditionWord or not
+bool isConditionWord(const char *word) {
+    for (int i = 0; i < sizeof(conditionWords) / sizeof(conditionWords[0]); i++) {
+        if (strcmp(word, conditionWords[i]) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// to check if the word is an action word or not
+bool isActionWord(const char *word) {
+    for (int i = 0; i < sizeof(actions) / sizeof(actions[0]); i++) {
+        if (strcmp(word, actions[i]) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 char **parsing(char *tokens[], int numTokens) {
     char **sentences = malloc(sizeof(char *) * 1024);
     if (sentences == NULL) {
@@ -242,6 +273,7 @@ char **parsing(char *tokens[], int numTokens) {
                     strcat(sentence, " ");
                 }
             }
+
             sentences[sentenceIndex++] = strdup(sentence); // Allocate memory and copy string
             if (sentences[sentenceIndex - 1] == NULL) {
                 fprintf(stderr, "Memory allocation failed\n");
@@ -281,9 +313,40 @@ char **parsing(char *tokens[], int numTokens) {
             sentence[0] = '\0'; // Reset sentence for the next iteration
         }
 
+        /* Frodo and Sam go to Bree and Frodo buy 3 map from Aragorn and Sam sell 2
+           dagger to Legolas if Frodo has more than 2 ring and Legolas and Gimli at Bree
+           and Frodo and Sam go to Rivendell if Aragorn has 5 map and Frodo has less than
+           5 potion and Sam has 3 dagger and Frodo sell 1 potion to Arwen and Legolas
+           and Gimli go to Rivendell */
+        // if Frodo and Sam at Mordor
         else if (strcmp(tokens[tokenIndex], "if") == 0) {
+            bool conditionFound = false;
+            bool actionFound = false;
+            int ifIndex = tokenIndex;
+            int lastAndIndex = 0;
             tokenIndex++; 
 
+            while (tokenIndex < numTokens && !isActionWord(tokens[tokenIndex])) {
+                if (isConditionWord(tokens[tokenIndex])) {
+                    if (strcmp(tokens[tokenIndex], "at") == 0) {
+                        strcat(sentence, tokens[tokenIndex]);
+                        strcat(sentence, " ");
+                        tokenIndex++;
+
+                        if (isNumeric(tokens[tokenIndex])) {
+                            printf("INVALID\n");
+                            break;
+                        }
+                    }
+                }
+
+                else {
+                    strcat(sentence, tokens[tokenIndex]);
+                    strcat(sentence, " ");
+                    tokenIndex++;
+                }
+            }
+            tokenIndex++;
         }
 
         tokenIndex++; // Move to the next token
