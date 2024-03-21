@@ -253,7 +253,7 @@ char **parsing(char *tokens[], int numTokens) {
         strcat(sentence, tokens[tokenIndex]);
         strcat(sentence, " ");
 
-        // ali buy 2 bread if burak has 3 bread
+        // ali buy 2 bread if burak at mordor
         if (strcmp(tokens[tokenIndex], "buy") == 0 || strcmp(tokens[tokenIndex], "sell") == 0) {
             tokenIndex++; // Move to the next token
             if (!isNumeric(tokens[tokenIndex])) {
@@ -265,7 +265,7 @@ char **parsing(char *tokens[], int numTokens) {
             strcat(sentence, " ");
 
             // Check for additional items to buy
-            while ((tokenIndex + 1 < numTokens) &&
+            while ((tokenIndex + 1 < numTokens) && (strcmp(tokens[tokenIndex + 1], "if") != 0) &&  
                     ((strcmp(tokens[tokenIndex], "and") != 0 || isNumeric(tokens[tokenIndex + 1])))) {
                 tokenIndex++;
                 if(strcmp(tokens[tokenIndex], "and") != 0) {
@@ -326,11 +326,24 @@ char **parsing(char *tokens[], int numTokens) {
             int lastAndIndex = 0;
             tokenIndex++; 
 
-            while (tokenIndex < numTokens && !isActionWord(tokens[tokenIndex])) {
+            // ali buy 2 bread if burak at mordor and bora go to mordor
+            while (tokenIndex < numTokens) {
+                if (strcmp(tokens[tokenIndex], "and") == 0) {
+                    lastAndIndex = tokenIndex;
+                }
+
+                if (isActionWord(tokens[tokenIndex])) {
+                    for (int i = ifIndex + 1; i < lastAndIndex; i++) {
+                        strcat(sentence, tokens[i]);
+                        strcat(sentence, " ");
+                    }
+                    actionFound = true;
+                    tokenIndex = lastAndIndex;
+                    break;
+                }
+
                 if (isConditionWord(tokens[tokenIndex])) {
                     if (strcmp(tokens[tokenIndex], "at") == 0) {
-                        strcat(sentence, tokens[tokenIndex]);
-                        strcat(sentence, " ");
                         tokenIndex++;
 
                         if (isNumeric(tokens[tokenIndex])) {
@@ -338,20 +351,52 @@ char **parsing(char *tokens[], int numTokens) {
                             break;
                         }
                     }
+
+                    // ali buy 2 bread if gandalf and gollum has 6 bread and 4 water
+                    else if (strcmp(tokens[tokenIndex], "has") == 0) {
+                        tokenIndex++;
+
+                        if (strcmp(tokens[tokenIndex], "less") == 0 || strcmp(tokens[tokenIndex], "more") == 0) {
+                            tokenIndex++;
+                            if (strcmp(tokens[tokenIndex], "than") != 0) {
+                                printf("INVALID\n");
+                                break;
+                            }
+                        }
+
+                        else if (!isNumeric(tokens[tokenIndex])) {
+                            printf("INVALID\n");
+                            break;
+                        }
+
+                        //printf("ifIndex: %d\n", ifIndex);
+
+                        while ((tokenIndex + 1 < numTokens) &&  
+                                ((strcmp(tokens[tokenIndex], "and") != 0 || isNumeric(tokens[tokenIndex + 1])))) {
+                            tokenIndex++;
+                        }
+                    }
                 }
 
                 else {
-                    strcat(sentence, tokens[tokenIndex]);
-                    strcat(sentence, " ");
                     tokenIndex++;
                 }
             }
+
+            if (!actionFound) {
+                for (int i = ifIndex + 1; i < numTokens; i++) {
+                    strcat(sentence, tokens[i]);
+                    strcat(sentence, " ");
+                }
+            }
+
             sentences[sentenceIndex++] = strdup(sentence); // Allocate memory and copy string
             if (sentences[sentenceIndex - 1] == NULL) {
                 fprintf(stderr, "Memory allocation failed\n");
                 exit(EXIT_FAILURE);
             }
             sentence[0] = '\0'; // Reset sentence for the next iteration
+        
         }
 
         tokenIndex++; // Move to the next token
