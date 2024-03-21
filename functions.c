@@ -6,28 +6,28 @@
 int personCount = 0;
 
 char *keywords[] = {
-        "go",
-        "to",
-        "from",
-        "and",
-        "at",
-        "has",
-        "if",
-        "less",
-        "more",
-        "than",
-        "exit",
-        "where",
-        "total",
-        "who",
-        "NOBODY",
-        "NOTHING",
-        "NOWHERE"
+    "go", 
+    "to", 
+    "from", 
+    "and", 
+    "at", 
+    "has", 
+    "if", 
+    "less", 
+    "more", 
+    "than", 
+    "exit", 
+    "where", 
+    "total", 
+    "who",
+    "NOBODY", 
+    "NOTHING", 
+    "NOWHERE"
 };
 
 char *actions[] = {
-        "sell",
-        "buy",
+    "sell",
+    "buy", 
 };
 
 /*
@@ -46,7 +46,7 @@ typedef struct {
 
 typedef struct {
     char *name;
-    Location location;
+    Location location; 
     Item items[250];
     int numItems;
 } Person;
@@ -187,10 +187,10 @@ bool isNumeric(const char *str) {
     while (*str != '\0') {
         if (*str < '0' || *str > '9') {
             return false;         }
-        str++;
+        str++; 
     }
 
-    return true;
+    return true; 
 }
 
 char **parsing(char *tokens[], int numTokens) {
@@ -217,7 +217,7 @@ char **parsing(char *tokens[], int numTokens) {
         }
         exit(0);
     }
-
+    
     while (tokenIndex < numTokens) {
         strcat(sentence, tokens[tokenIndex]);
         strcat(sentence, " ");
@@ -235,7 +235,7 @@ char **parsing(char *tokens[], int numTokens) {
 
             // Check for additional items to buy
             while ((tokenIndex + 1 < numTokens) &&
-                   ((strcmp(tokens[tokenIndex], "and") != 0 || isNumeric(tokens[tokenIndex + 1])))) {
+                    ((strcmp(tokens[tokenIndex], "and") != 0 || isNumeric(tokens[tokenIndex + 1])))) {
                 tokenIndex++;
                 if(strcmp(tokens[tokenIndex], "and") != 0) {
                     strcat(sentence, tokens[tokenIndex]);
@@ -250,7 +250,7 @@ char **parsing(char *tokens[], int numTokens) {
             sentence[0] = '\0'; // Reset sentence for the next iteration
         }
 
-            // ali go to ist
+        // ali go to ist
         else if (strcmp(tokens[tokenIndex], "go") == 0) {
             tokenIndex++; // Move to the next token
 
@@ -266,13 +266,13 @@ char **parsing(char *tokens[], int numTokens) {
             // Add location to sentence
             strcat(sentence, tokens[tokenIndex]);
             strcat(sentence, " ");
-
+            
             if (tokenIndex + 1 < numTokens) {
                 if (strcmp(tokens[tokenIndex + 1], "and") == 0) {
                     tokenIndex++;
                 }
             }
-
+            
             sentences[sentenceIndex++] = strdup(sentence); // Allocate memory and copy string
             if (sentences[sentenceIndex - 1] == NULL) {
                 fprintf(stderr, "Memory allocation failed\n");
@@ -282,7 +282,7 @@ char **parsing(char *tokens[], int numTokens) {
         }
 
         else if (strcmp(tokens[tokenIndex], "if") == 0) {
-            tokenIndex++;
+            tokenIndex++; 
 
         }
 
