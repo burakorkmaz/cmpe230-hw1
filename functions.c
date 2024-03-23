@@ -8,36 +8,36 @@ int personCount = 0;
 char *keywords[] = {
     "buy",
     "sell",
-    "go", 
-    "to", 
-    "from", 
-    "and", 
-    "at", 
-    "has", 
-    "if", 
-    "less", 
-    "more", 
-    "than", 
-    "exit", 
-    "where", 
-    "total", 
+    "go",
+    "to",
+    "from",
+    "and",
+    "at",
+    "has",
+    "if",
+    "less",
+    "more",
+    "than",
+    "exit",
+    "where",
+    "total",
     "who",
-    "NOBODY", 
-    "NOTHING", 
+    "NOBODY",
+    "NOTHING",
     "NOWHERE"
 };
 
 char *conditionWords[] = {
     "has",
     "at"
-    //"less", 
-    //"more", 
+    //"less",
+    //"more",
     //"than"
 };
 
 char *actions[] = {
     "sell",
-    "buy", 
+    "buy",
     "go"
 };
 
@@ -57,7 +57,7 @@ typedef struct {
 
 typedef struct {
     char *name;
-    Location location; 
+    Location location;
     Item items[250];
     int numItems;
 } Person;
@@ -115,12 +115,15 @@ void addItem(Person *p, char *item, int quantity) {
     p->numItems++;
 }
 
-void buy(char *name[], char *items[], int quantity[], int numItems) {
+void buy(char *name[], char *items[], int quantity[], int numItems, int numSubjects) {
     // numPeople is the number of strings in the name array
-    int numPeople = 0;
+    int numPeople = numSubjects;
+    /*
     while (name[numPeople] != NULL) {
         numPeople++;
     }
+     */
+
 
     for (int i = 0; i < numPeople; i++) {
         if (personCount == 0) {
@@ -207,10 +210,10 @@ bool isNumeric(const char *str) {
     while (*str != '\0') {
         if (*str < '0' || *str > '9') {
             return false;         }
-        str++; 
+        str++;
     }
 
-    return true; 
+    return true;
 }
 
 // to check if the word is a conditionWord or not
@@ -272,7 +275,7 @@ char **parsing(char *tokens[], int numTokens) {
         }
         exit(0);
     }
-    
+
     while (tokenIndex < numTokens) {
         strcat(sentence, tokens[tokenIndex]);
         strcat(sentence, " ");
@@ -289,7 +292,7 @@ char **parsing(char *tokens[], int numTokens) {
             strcat(sentence, " ");
 
             // Check for additional items to buy
-            while ((tokenIndex + 1 < numTokens) && (strcmp(tokens[tokenIndex + 1], "if") != 0) &&  
+            while ((tokenIndex + 1 < numTokens) && (strcmp(tokens[tokenIndex + 1], "if") != 0) &&
                     ((strcmp(tokens[tokenIndex], "and") != 0 || isNumeric(tokens[tokenIndex + 1])))) {
                 tokenIndex++;
                 if(strcmp(tokens[tokenIndex], "and") != 0) {
@@ -322,13 +325,13 @@ char **parsing(char *tokens[], int numTokens) {
             // Add location to sentence
             strcat(sentence, tokens[tokenIndex]);
             strcat(sentence, " ");
-            
+
             if (tokenIndex + 1 < numTokens) {
                 if (strcmp(tokens[tokenIndex + 1], "and") == 0) {
                     tokenIndex++;
                 }
             }
-            
+
             sentences[sentenceIndex++] = strdup(sentence); // Allocate memory and copy string
             if (sentences[sentenceIndex - 1] == NULL) {
                 fprintf(stderr, "Memory allocation failed\n");
@@ -351,11 +354,11 @@ char **parsing(char *tokens[], int numTokens) {
             int ifIndex = tokenIndex;
             int lastAndIndex = 0;
 
-            tokenIndex++; 
+            tokenIndex++;
 
             // ali buy 3 ring if burak has 3 ring and berk and bora sell 2 esek
             while (tokenIndex < numTokens) {
-                
+
                 if (strcmp(tokens[tokenIndex], "and") == 0) {
                     if (strcmp(condition, "has") == 0 && !isNumeric(tokens[tokenIndex + 1])) {
                         lastAndIndex = tokenIndex;
@@ -366,7 +369,7 @@ char **parsing(char *tokens[], int numTokens) {
                         strcpy(condition, "");
                     }
                 }
-                
+
                 if (isActionWord(tokens[tokenIndex])) {
                     for (int i = ifIndex + 1; i < lastAndIndex; i++) {
                         strcat(sentence, tokens[i]);
@@ -434,7 +437,7 @@ char **parsing(char *tokens[], int numTokens) {
                 exit(EXIT_FAILURE);
             }
             sentence[0] = '\0'; // Reset sentence for the next iteration
-        
+
         }
 
         tokenIndex++; // Move to the next token
@@ -530,7 +533,8 @@ void applySentence(char *sentence) {
     char *action = tokens[actionIndex];
 
     if (strcmp(action, "buy") == 0) {
-        buy(subjects, items, quantities, itemIndex); 
+
+        buy(subjects, items, quantities, itemIndex, subjIndex);
     }
 }
 
@@ -568,7 +572,7 @@ void semanticAnalysis(char **sentences) {
         if (ifIndex != sentenceIndex) {
             if (isIfTrue(sentences[ifIndex])) {
                 for (int j = sentenceIndex; sentenceIndex < ifIndex; j++) {
-                    applySentence(sentences[j]);   
+                    applySentence(sentences[j]);
                 }
                 sentenceIndex = ifIndex;
             }
@@ -591,7 +595,7 @@ void semanticAnalysis(char **sentences) {
         }
 
         else {
-            x = sentenceIndex;        
+            x = sentenceIndex;
         }
 
         while (sentences[x] != NULL) {
