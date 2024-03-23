@@ -94,20 +94,15 @@ void findKeyword(char *input) {
     }
 }
 
-void findAction(char *tokens[], int *start, int *nextStart, int *actionIndex, int numTokens) {
-    for (int j = *start; j < numTokens; j++) {
-        for (int i = 0; i < sizeof(actions) / sizeof(actions[0]); i++) {
-            if (strcmp(tokens[j], actions[i]) == 0) {
-                printf("Action: %s\n", actions[i]);
-                printf("Token: %s\n", tokens[j]);
-                *nextStart = j + 1;
-                *start = *nextStart;
-                *actionIndex = j;
+void findAction(char *tokens[], int *actionIndex, int numTokens) {
+    for (int i = 0; i < numTokens; i++) {
+        for (int j = 0; j < sizeof(actions) / sizeof(actions[0]); j++) {
+            if (strcmp(tokens[i], actions[j]) == 0) {
+                *actionIndex = i;
                 return;
             }
         }
     }
-    *nextStart = numTokens;
 }
 
 Person personList[1024];
@@ -433,4 +428,87 @@ char **parsing(char *tokens[], int numTokens) {
 
     free(sentence); // Free dynamically allocated memory for sentence
     return sentences;
+}
+
+//void buy(char *name[], char *items[], int quantity[])
+// burak and ali buy 3 bread and 5 water
+void applySentence(char *sentence) {
+    //find the index of action word
+    int actionIndex = 0;
+    int start = 0;
+    int nextStart = 0;
+    int numTokens = 0;
+
+    char *tokens[250];
+    char *token = strtok(sentence, " ");
+    int i = 0;
+
+    while (token != NULL) {
+        tokens[i] = token;
+        token = strtok(NULL, " ");
+        i++;
+    }
+    numTokens = i;
+
+    findAction(tokens, &actionIndex, numTokens); 
+}
+
+// burak buy 3 bread
+void semanticAnalysis(char **sentences) {
+    int sentenceIndex = 0;
+    int ifIndex = 0;
+
+    int i = 0;
+    bool isIfFound = false;
+    bool doesIfExist = false;
+
+    while (sentences[i] != NULL) {
+        char *sentence = malloc(sizeof(char) * 1025);
+        sentence = sentences[i];
+
+        // hold the first and second letter of the sentence
+        char *firstTwoLetters = malloc(sizeof(char) * 2);
+        firstTwoLetters[0] = sentence[0];
+        firstTwoLetters[1] = sentence[1];
+
+        if (strcmp(firstTwoLetters, "if") == 0) {
+            ifIndex = i;
+            isIfFound = true;
+            doesIfExist = true;
+        }
+
+        if (ifIndex != sentenceIndex) {
+            if (isIfTrue(sentences[ifIndex])) {
+                for (int j = sentenceIndex; sentenceIndex < ifIndex; j++) {
+                    applySentence(sentences[j]);   
+                }
+                sentenceIndex = ifIndex;
+            }
+        }
+
+        if (isIfFound) {
+            i = ifIndex;
+            isIfFound = false;
+        }
+
+        else {
+            i++;
+        }
+    }
+
+    if (ifIndex == sentenceIndex) {
+        int x;
+        if (doesIfExist) {
+            x = sentenceIndex + 1;
+        }
+
+        else {
+            x = sentenceIndex;        
+        }
+
+        while (sentences[x] != NULL) {
+            applySentence(sentences[x]);
+            x++;
+        }
+    }
 }
