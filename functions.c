@@ -440,6 +440,11 @@ void applySentence(char *sentence) {
     int numTokens = 0;
 
     char *tokens[250];
+    char *subjects[250];
+    int subjIndex = 0;
+    char *items[250];
+    int itemIndex = 0;
+    int quantities[250];
     char *token = strtok(sentence, " ");
     int i = 0;
 
@@ -450,7 +455,24 @@ void applySentence(char *sentence) {
     }
     numTokens = i;
 
-    findAction(tokens, &actionIndex, numTokens); 
+    findAction(tokens, &actionIndex, numTokens);
+    //printf("Index : %d\n", actionIndex);
+    for(int i = 0; i < actionIndex ; i++){
+        if(strcmp(tokens[i], "and") != 0) {
+            subjects[subjIndex++] = tokens[i];
+        }
+    }
+    for(int j = actionIndex + 1; j < numTokens ; j++){
+        if (strcmp(tokens[j], "and") != 0))  {
+            if (!isNumeric(tokens[j])) {
+                items[itemIndex++] = tokens[j];
+            }else{
+                quantites[itemIndex] = tokens[j];
+            }
+        }
+    }
+
+
 }
 
 // burak buy 3 bread

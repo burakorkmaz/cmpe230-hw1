@@ -5,6 +5,7 @@ void tokenize(char *buffer, char *delim, char **tokens, int *numTokens);
 void findKeyword(char *token);
 void findAction(char *tokens[], int *start, int *nextStart, int *actionIndex, int numTokens);
 char **parsing(char *tokens[], int numTokens);
+void semanticAnalysis(char **sentences);
 
 int start = 0;
 int actionIndex = 0;
@@ -27,6 +28,7 @@ int main() {
     for (int i = 0; parsedTokens[i] != NULL; i++) {
         printf("%s\n", parsedTokens[i]);
     }
+    semanticAnalysis(parsedTokens);
 
     return 0;
 }
