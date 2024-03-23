@@ -332,27 +332,22 @@ char **parsing(char *tokens[], int numTokens) {
 
             // ali buy 2 bread if berk has 3 ring and burak and efe buy 1 ring
             // ali buy 2 bread if berk at mordor and burak and efe buy 1 ring
+            // ali buy 2 bread if burak and efe has 5 ring and berk at mordor and bora and burak sell 5 ring
             while (tokenIndex < numTokens) {
-                /*
+                
                 if (strcmp(tokens[tokenIndex], "and") == 0) {
                     if (strcmp(condition, "has") == 0 && !isNumeric(tokens[tokenIndex + 1])) {
                         lastAndIndex = tokenIndex;
-                        printf("currenct sentence in has: %s\n", sentence);
-                        break;
                     }
                     else if (strcmp(condition, "at") == 0) {
+                        while (tokenIndex < numTokens && !isActionWord(tokens[tokenIndex]) && 
+                                !isConditionWord(tokens[tokenIndex])) {
+                            tmpAndIndex = tokenIndex; 
+                        }
                         lastAndIndex = tokenIndex;
-                        printf("currenct sentence in at: %s\n", sentence);
-                        sentences[sentenceIndex++] = strdup(sentence); 
-                        break;
-                    }
-                    else {
-                        lastAndIndex = tokenIndex;
-                        sentences[sentenceIndex++] = strdup(sentence); 
-                        break;
                     }
                 }
-                */
+                
 
                 if (isActionWord(tokens[tokenIndex])) {
                     for (int i = ifIndex + 1; i < lastAndIndex; i++) {
@@ -366,7 +361,7 @@ char **parsing(char *tokens[], int numTokens) {
 
                 if (isConditionWord(tokens[tokenIndex])) {
                     conditionFound = true;
-                    strcat(condition, tokens[tokenIndex]);
+                    strcpy(condition, tokens[tokenIndex]);
 
                     if (strcmp(condition, "at") == 0) {
                         tokenIndex++;
@@ -400,12 +395,14 @@ char **parsing(char *tokens[], int numTokens) {
 
                         //printf("ifIndex: %d\n", ifIndex);
 
+                        // ali buy 2 bread if burak and efe has 5 ring and berk at mordor and bora sell 5 ring
+                        /*
                         while ((tokenIndex < numTokens) &&  
                                 ((strcmp(tokens[tokenIndex], "and") != 0 || isNumeric(tokens[tokenIndex + 1])))) {
                             tokenIndex++;
-                        }
-                        lastAndIndex = tokenIndex;
-                        break;
+                        }*/
+                        //lastAndIndex = tokenIndex;
+                        //break;
                     }
                 }
 
