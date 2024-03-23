@@ -66,9 +66,11 @@ void printPerson(Person *person) {
     printf("Name: %s\n", person->name);
     printf("Location: %s\n", person->location.name);
     printf("Items: \n");
-    for (int i = 0; i < person->items->quantity; i++) {
-        printf("  %s: %d\n", person->items[i].name, person->items[i].quantity);
+    for (int i = 0; i < person->numItems; i++) {
+        printf("Item: %s\n", person->items[i].name);
+        printf("Quantity: %d\n", person->items[i].quantity);
     }
+    printf("\n");
 }
 
 void createPerson(Person *person, char *name) {
@@ -107,15 +109,27 @@ void findAction(char *tokens[], int *actionIndex, int numTokens) {
 
 Person personList[1024];
 
-void addItem(Person p, char *item, int quantity) {
-    p.items[p.numItems].name = item;
-    p.items[p.numItems].quantity = quantity;
-    p.numItems++;
+void addItem(Person *p, char *item, int quantity) {
+    p->items[p->numItems].name = item;
+    p->items[p->numItems].quantity = quantity;
+    p->numItems++;
 }
 
-void buy(char *name[], char *items[], int quantity[]) {
-    int numPeople = sizeof(personList) / sizeof(personList[0]);
+void buy(char *name[], char *items[], int quantity[], int numItems) {
+    // numPeople is the number of strings in the name array
+    int numPeople = 0;
+    while (name[numPeople] != NULL) {
+        numPeople++;
+    }
+
     for (int i = 0; i < numPeople; i++) {
+        if (personCount == 0) {
+            createPerson(&personList[personCount], name[i]);
+            for (int j = 0; j < numItems; j++) {
+                addItem(&personList[personCount], items[j], quantity[j]);
+            }
+        }
+
         for (int j = 0; j < personCount; j++) {
             if (strcmp(name[i], personList[j].name) == 0) {
                 for (int k = 0; k < personList[j].numItems; k++) {
@@ -124,14 +138,14 @@ void buy(char *name[], char *items[], int quantity[]) {
                         return;
                     }
                     else {
-                        addItem(personList[j], items[i], quantity[i]);
+                        addItem(&personList[j], items[i], quantity[i]);
                         return;
                     }
                 }
             }
             else {
                 createPerson(&personList[personCount], name[i]);
-                addItem(personList[personCount - 1], items[i], quantity[i]);
+                addItem(&personList[personCount - 1], items[i], quantity[i]);
                 return;
             }
         }
@@ -151,14 +165,14 @@ void sell(char *name[], char *items[], int quantity[]) {
                         return;
                     }
                     else {
-                        addItem(personList[j], items[i], quantity[i]);
+                        addItem(&personList[j], items[i], quantity[i]);
                         return;
                     }
                 }
             }
             else {
                 createPerson(&personList[personCount], name[i]);
-                addItem(personList[personCount - 1], items[i], quantity[i]);
+                addItem(&personList[personCount - 1], items[i], quantity[i]);
                 return;
             }
         }
@@ -430,6 +444,24 @@ char **parsing(char *tokens[], int numTokens) {
     return sentences;
 }
 
+bool doesFromExist(char **tokens) {
+    for (int i = 0; i < sizeof(tokens) / sizeof(tokens[0]); i++) {
+        if (strcmp(tokens[i], "from") == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void indexOfFrom(char **tokens, int *fromIndex) {
+    for (int i = 0; i < sizeof(tokens) / sizeof(tokens[0]); i++) {
+        if (strcmp(tokens[i], "from") == 0) {
+            *fromIndex = i;
+            return;
+        }
+    }
+}
+
 //void buy(char *name[], char *items[], int quantity[])
 // burak and ali buy 3 bread and 5 water
 void applySentence(char *sentence) {
@@ -462,17 +494,51 @@ void applySentence(char *sentence) {
             subjects[subjIndex++] = tokens[i];
         }
     }
-    for(int j = actionIndex + 1; j < numTokens ; j++){
-        if (strcmp(tokens[j], "and") != 0))  {
-            if (!isNumeric(tokens[j])) {
-                items[itemIndex++] = tokens[j];
-            }else{
-                quantites[itemIndex] = tokens[j];
+
+    // ali buy 2 bread
+    if (!doesFromExist(tokens)) {
+        for(int j = actionIndex + 1; j < numTokens; j++) {
+            if (strcmp(tokens[j], "and") != 0)  {
+                if (!isNumeric(tokens[j])) {
+                    items[itemIndex++] = tokens[j];
+                }
+                else {
+                    quantities[itemIndex] = atoi(tokens[j]);
+                }
             }
         }
     }
 
+    else {
+        int fromIndex;
+        indexOfFrom(tokens, &fromIndex);
+        for(int j = actionIndex + 1; j < fromIndex; j++) {
+            if (strcmp(tokens[j], "and") != 0)  {
+                if (!isNumeric(tokens[j])) {
+                    items[itemIndex++] = tokens[j];
+                }
+                else {
+                    quantities[itemIndex] = atoi(tokens[j]);
+                }
+            }
+        }
+        char *seller = tokens[fromIndex + 1];
+        char *sellerName[100];
+        strcpy(sellerName[0], seller);
+    }
 
+    char *action = tokens[actionIndex];
+
+    if (strcmp(action, "buy") == 0) {
+        buy(subjects, items, quantities, itemIndex); 
+    }
+}
+
+void printPersonList() {
+    printf("Person Count: %d\n", personCount);
+    for (int i = 0; i < personCount; i++) {
+        printPerson(&personList[i]);
+    }
 }
 
 // burak buy 3 bread
@@ -533,4 +599,6 @@ void semanticAnalysis(char **sentences) {
             x++;
         }
     }
+    printPersonList();
 }
+
