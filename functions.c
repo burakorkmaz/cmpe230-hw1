@@ -434,3 +434,14 @@ char **parsing(char *tokens[], int numTokens) {
     free(sentence); // Free dynamically allocated memory for sentence
     return sentences;
 }
+
+// burak buy 3 bread
+void semanticAnalysis(char **sentences) {
+    int sentenceIndex = 0;
+    int ifIndex = 0;
+
+    int i = 0;
+    while (sentences[i] != NULL) {
+        
+    }
+}
