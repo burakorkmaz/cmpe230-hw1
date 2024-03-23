@@ -94,20 +94,15 @@ void findKeyword(char *input) {
     }
 }
 
-void findAction(char *tokens[], int *start, int *nextStart, int *actionIndex, int numTokens) {
-    for (int j = *start; j < numTokens; j++) {
-        for (int i = 0; i < sizeof(actions) / sizeof(actions[0]); i++) {
-            if (strcmp(tokens[j], actions[i]) == 0) {
-                printf("Action: %s\n", actions[i]);
-                printf("Token: %s\n", tokens[j]);
-                *nextStart = j + 1;
-                *start = *nextStart;
-                *actionIndex = j;
+void findAction(char *tokens[], int *actionIndex, int numTokens) {
+    for (int i = 0; i < numTokens; i++) {
+        for (int j = 0; j < sizeof(actions) / sizeof(actions[0]); j++) {
+            if (strcmp(tokens[i], actions[j]) == 0) {
+                *actionIndex = i;
                 return;
             }
         }
     }
-    *nextStart = numTokens;
 }
 
 Person personList[1024];
@@ -454,6 +449,8 @@ void applySentence(char *sentence) {
         i++;
     }
     numTokens = i;
+
+    findAction(tokens, &actionIndex, numTokens); 
 }
 
 // burak buy 3 bread
