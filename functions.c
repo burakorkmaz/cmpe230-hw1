@@ -327,6 +327,7 @@ char **parsing(char *tokens[], int numTokens) {
             int ifIndex = tokenIndex;
             int lastAndIndex = 0;
             int tmpAndIndex = 0;
+            int passedWordCount = 0;
 
             tokenIndex++; 
 
@@ -340,15 +341,11 @@ char **parsing(char *tokens[], int numTokens) {
                         lastAndIndex = tokenIndex;
                     }
                     else if (strcmp(condition, "at") == 0) {
-                        while (tokenIndex < numTokens && !isActionWord(tokens[tokenIndex]) && 
-                                !isConditionWord(tokens[tokenIndex])) {
-                            tmpAndIndex = tokenIndex; 
-                        }
                         lastAndIndex = tokenIndex;
+                        strcpy(condition, "");
                     }
                 }
                 
-
                 if (isActionWord(tokens[tokenIndex])) {
                     for (int i = ifIndex + 1; i < lastAndIndex; i++) {
                         strcat(sentence, tokens[i]);
@@ -392,17 +389,6 @@ char **parsing(char *tokens[], int numTokens) {
                             printf("INVALID\n");
                             break;
                         }
-
-                        //printf("ifIndex: %d\n", ifIndex);
-
-                        // ali buy 2 bread if burak and efe has 5 ring and berk at mordor and bora sell 5 ring
-                        /*
-                        while ((tokenIndex < numTokens) &&  
-                                ((strcmp(tokens[tokenIndex], "and") != 0 || isNumeric(tokens[tokenIndex + 1])))) {
-                            tokenIndex++;
-                        }*/
-                        //lastAndIndex = tokenIndex;
-                        //break;
                     }
                 }
 
