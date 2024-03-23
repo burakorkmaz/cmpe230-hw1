@@ -435,13 +435,83 @@ char **parsing(char *tokens[], int numTokens) {
     return sentences;
 }
 
+//void buy(char *name[], char *items[], int quantity[])
+// burak and ali buy 3 bread and 5 water
+void applySentence(char *sentence) {
+    //find the index of action word
+    int actionIndex = 0;
+    int start = 0;
+    int nextStart = 0;
+    int numTokens = 0;
+
+    char *tokens[250];
+    char *token = strtok(sentence, " ");
+    int i = 0;
+
+    while (token != NULL) {
+        tokens[i] = token;
+        token = strtok(NULL, " ");
+        i++;
+    }
+    numTokens = i;
+}
+
 // burak buy 3 bread
 void semanticAnalysis(char **sentences) {
     int sentenceIndex = 0;
     int ifIndex = 0;
 
     int i = 0;
+    bool isIfFound = false;
+    bool doesIfExist = false;
+
     while (sentences[i] != NULL) {
-        
+        char *sentence = malloc(sizeof(char) * 1025);
+        sentence = sentences[i];
+
+        // hold the first and second letter of the sentence
+        char *firstTwoLetters = malloc(sizeof(char) * 2);
+        firstTwoLetters[0] = sentence[0];
+        firstTwoLetters[1] = sentence[1];
+
+        if (strcmp(firstTwoLetters, "if") == 0) {
+            ifIndex = i;
+            isIfFound = true;
+            doesIfExist = true;
+        }
+
+        if (ifIndex != sentenceIndex) {
+            if (isIfTrue(sentences[ifIndex])) {
+                for (int j = sentenceIndex; sentenceIndex < ifIndex; j++) {
+                    applySentence(sentences[j]);   
+                }
+                sentenceIndex = ifIndex;
+            }
+        }
+
+        if (isIfFound) {
+            i = ifIndex;
+            isIfFound = false;
+        }
+
+        else {
+            i++;
+        }
+    }
+
+    if (ifIndex == sentenceIndex) {
+        int x;
+        if (doesIfExist) {
+            x = sentenceIndex + 1;
+        }
+
+        else {
+            x = sentenceIndex;        
+        }
+
+        while (sentences[x] != NULL) {
+            applySentence(sentences[x]);
+            x++;
+        }
     }
 }
