@@ -65,7 +65,7 @@ typedef struct {
 void printPerson(Person *person) {
     printf("Name: %s\n", person->name);
     printf("Location: %s\n", person->location.name);
-    printf("Items: \n");
+    printf("numItems: %d\n", person->numItems);
     for (int i = 0; i < person->numItems; i++) {
         printf("Item: %s\n", person->items[i].name);
         printf("Quantity: %d\n", person->items[i].quantity);
@@ -116,40 +116,40 @@ void addItem(Person *p, char *item, int quantity) {
 }
 
 void buy(char *name[], char *items[], int quantity[], int numItems, int numSubjects) {
-    // numPeople is the number of strings in the name array
-    int numPeople = numSubjects;
-    /*
-    while (name[numPeople] != NULL) {
-        numPeople++;
-    }
-     */
-
-
-    for (int i = 0; i < numPeople; i++) {
+    for (int i = 0; i < numSubjects; i++) {
+        bool personExists = false;
         if (personCount == 0) {
             createPerson(&personList[personCount], name[i]);
+            personExists = true;
             for (int j = 0; j < numItems; j++) {
-                addItem(&personList[personCount], items[j], quantity[j]);
+                addItem(&personList[personCount - 1], items[j], quantity[j]);
             }
+            continue;
         }
 
         for (int j = 0; j < personCount; j++) {
             if (strcmp(name[i], personList[j].name) == 0) {
-                for (int k = 0; k < personList[j].numItems; k++) {
-                    if (strcmp(items[i], personList[j].items[k].name) == 0) {
-                        personList[j].items[k].quantity += quantity[i];
-                        return;
+                personExists = true;
+                for (int l = 0; l < numItems; l++) {
+                    bool itemExists = false;
+                    for (int k = 0; k < personList[j].numItems; k++) {
+                        if (strcmp(items[l], personList[j].items[k].name) == 0) {
+                            personList[j].items[k].quantity += quantity[l];
+                            itemExists = true;
+                            break;
+                        }
                     }
-                    else {
-                        addItem(&personList[j], items[i], quantity[i]);
-                        return;
+                    if (!itemExists) {
+                        addItem(&personList[j], items[l], quantity[l]);
                     }
                 }
             }
-            else {
-                createPerson(&personList[personCount], name[i]);
-                addItem(&personList[personCount - 1], items[i], quantity[i]);
-                return;
+        }
+
+        if (!personExists) {
+            createPerson(&personList[personCount], name[i]);
+            for (int k = 0; k < numItems; k++) {
+                addItem(&personList[personCount - 1], items[k], quantity[k]);
             }
         }
     }
@@ -533,19 +533,17 @@ void applySentence(char *sentence) {
     char *action = tokens[actionIndex];
 
     if (strcmp(action, "buy") == 0) {
-
         buy(subjects, items, quantities, itemIndex, subjIndex);
     }
 }
 
 void printPersonList() {
-    printf("Person Count: %d\n", personCount);
     for (int i = 0; i < personCount; i++) {
         printPerson(&personList[i]);
     }
 }
 
-// burak buy 3 bread
+// burak buy 2 bread
 void semanticAnalysis(char **sentences) {
     int sentenceIndex = 0;
     int ifIndex = 0;
@@ -605,4 +603,3 @@ void semanticAnalysis(char **sentences) {
     }
     printPersonList();
 }
-
