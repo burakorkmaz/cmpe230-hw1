@@ -224,6 +224,19 @@ bool isActionWord(const char *word) {
     return false;
 }
 
+bool isKeyword(const char *word) {
+    for (int i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++) {
+        if (strcmp(word, keywords[i]) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool isIfTrue(char *ifSentence) {
+    return true;
+}
+
 char **parsing(char *tokens[], int numTokens) {
     char **sentences = malloc(sizeof(char *) * 1024);
     if (sentences == NULL) {
@@ -232,6 +245,8 @@ char **parsing(char *tokens[], int numTokens) {
     }
     int sentenceIndex = 0;
     int tokenIndex = 0;
+
+    int lastTrueIfIndex = 0;
 
     char *sentence = malloc(sizeof(char) * 1025);
     if (sentence == NULL) {
@@ -326,19 +341,16 @@ char **parsing(char *tokens[], int numTokens) {
 
             int ifIndex = tokenIndex;
             int lastAndIndex = 0;
-            int tmpAndIndex = 0;
-            int passedWordCount = 0;
 
             tokenIndex++; 
 
-            // ali buy 2 bread if berk has 3 ring and burak and efe buy 1 ring
-            // ali buy 2 bread if berk at mordor and burak and efe buy 1 ring
-            // ali buy 2 bread if burak and efe has 5 ring and berk at mordor and bora and burak sell 5 ring
+            // ali buy 3 ring if burak has 3 ring and berk and bora sell 2 esek
             while (tokenIndex < numTokens) {
                 
                 if (strcmp(tokens[tokenIndex], "and") == 0) {
                     if (strcmp(condition, "has") == 0 && !isNumeric(tokens[tokenIndex + 1])) {
                         lastAndIndex = tokenIndex;
+                        strcpy(condition, "");
                     }
                     else if (strcmp(condition, "at") == 0) {
                         lastAndIndex = tokenIndex;
@@ -403,6 +415,9 @@ char **parsing(char *tokens[], int numTokens) {
                     strcat(sentence, " ");
                 }
             }
+
+            // SEMANTIC IF ANALYSIS
+
 
             sentences[sentenceIndex++] = strdup(sentence); // Allocate memory and copy string
             if (sentences[sentenceIndex - 1] == NULL) {
