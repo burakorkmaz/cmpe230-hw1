@@ -6,8 +6,8 @@
 int personCount = 0;
 
 char *keywords[] = {
+    "buy",
     "sell",
-    "buy", 
     "go", 
     "to", 
     "from", 
@@ -27,9 +27,18 @@ char *keywords[] = {
     "NOWHERE"
 };
 
+char *conditionWords[] = {
+    "has",
+    "at"
+    //"less", 
+    //"more", 
+    //"than"
+};
+
 char *actions[] = {
     "sell",
     "buy", 
+    "go"
 };
 
 /*
@@ -195,6 +204,26 @@ bool isNumeric(const char *str) {
     return true; 
 }
 
+// to check if the word is a conditionWord or not
+bool isConditionWord(const char *word) {
+    for (int i = 0; i < sizeof(conditionWords) / sizeof(conditionWords[0]); i++) {
+        if (strcmp(word, conditionWords[i]) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// to check if the word is an action word or not
+bool isActionWord(const char *word) {
+    for (int i = 0; i < sizeof(actions) / sizeof(actions[0]); i++) {
+        if (strcmp(word, actions[i]) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 char **parsing(char *tokens[], int numTokens) {
     char **sentences = malloc(sizeof(char *) * 1024);
     if (sentences == NULL) {
@@ -219,15 +248,16 @@ char **parsing(char *tokens[], int numTokens) {
         }
         exit(0);
     }
-    //burak and ali buy 4 apple and 2 banana
+    
     while (tokenIndex < numTokens) {
         strcat(sentence, tokens[tokenIndex]);
         strcat(sentence, " ");
 
-        if (strcmp(tokens[tokenIndex], "buy") == 0) {
+        // ali buy 2 bread if burak at mordor
+        if (strcmp(tokens[tokenIndex], "buy") == 0 || strcmp(tokens[tokenIndex], "sell") == 0) {
             tokenIndex++; // Move to the next token
             if (!isNumeric(tokens[tokenIndex])) {
-                printf("INVALID");
+                printf("INVALID\n");
                 break;
             }
 
@@ -235,14 +265,15 @@ char **parsing(char *tokens[], int numTokens) {
             strcat(sentence, " ");
 
             // Check for additional items to buy
-            while ( (tokenIndex + 1 < numTokens) &&
-                    ( (strcmp(tokens[tokenIndex], "and") != 0 || isNumeric(tokens[tokenIndex + 1]))) ) {
+            while ((tokenIndex + 1 < numTokens) && (strcmp(tokens[tokenIndex + 1], "if") != 0) &&  
+                    ((strcmp(tokens[tokenIndex], "and") != 0 || isNumeric(tokens[tokenIndex + 1])))) {
                 tokenIndex++;
                 if(strcmp(tokens[tokenIndex], "and") != 0) {
                     strcat(sentence, tokens[tokenIndex]);
                     strcat(sentence, " ");
                 }
             }
+
             sentences[sentenceIndex++] = strdup(sentence); // Allocate memory and copy string
             if (sentences[sentenceIndex - 1] == NULL) {
                 fprintf(stderr, "Memory allocation failed\n");
@@ -250,34 +281,157 @@ char **parsing(char *tokens[], int numTokens) {
             }
             sentence[0] = '\0'; // Reset sentence for the next iteration
         }
-        else if (strcmp(tokens[tokenIndex], "sell") == 0) {
+
+        // ali go to ist
+        else if (strcmp(tokens[tokenIndex], "go") == 0) {
             tokenIndex++; // Move to the next token
-            if (!isNumeric(tokens[tokenIndex])) {
-                printf("INVALID");
+
+            if (strcmp(tokens[tokenIndex], "to") != 0) {
+                printf("INVALID\n");
                 break;
             }
 
-            strcat(sentence, tokens[tokenIndex]);
+            // Add "to" to sentence
+            strcat(sentence, tokens[tokenIndex++]);
             strcat(sentence, " ");
 
-            // Check for additional items to buy
-            while ( (tokenIndex + 1 < numTokens) &&
-                    ( (strcmp(tokens[tokenIndex], "and") != 0 || isNumeric(tokens[tokenIndex + 1]))) ) {
-                tokenIndex++;
-                strcat(sentence, tokens[tokenIndex]);
-                strcat(sentence, " ");
+            // Add location to sentence
+            strcat(sentence, tokens[tokenIndex]);
+            strcat(sentence, " ");
+            
+            if (tokenIndex + 1 < numTokens) {
+                if (strcmp(tokens[tokenIndex + 1], "and") == 0) {
+                    tokenIndex++;
+                }
             }
+            
             sentences[sentenceIndex++] = strdup(sentence); // Allocate memory and copy string
             if (sentences[sentenceIndex - 1] == NULL) {
                 fprintf(stderr, "Memory allocation failed\n");
                 exit(EXIT_FAILURE);
             }
             sentence[0] = '\0'; // Reset sentence for the next iteration
+        }
+
+        /* Frodo and Sam go to Bree and Frodo buy 3 map from Aragorn and Sam sell 2
+           dagger to Legolas if Frodo has more than 2 ring and Legolas and Gimli at Bree
+           and Frodo and Sam go to Rivendell if Aragorn has 5 map and Frodo has less than
+           5 potion and Sam has 3 dagger and Frodo sell 1 potion to Arwen and Legolas
+           and Gimli go to Rivendell */
+        // if Frodo and Sam at Mordor
+        else if (strcmp(tokens[tokenIndex], "if") == 0) {
+            bool conditionFound = false;
+            bool actionFound = false;
+            char *condition = malloc(sizeof(char) * 10);
+
+            int ifIndex = tokenIndex;
+            int lastAndIndex = 0;
+            int tmpAndIndex = 0;
+
+            tokenIndex++; 
+
+            // ali buy 2 bread if berk has 3 ring and burak and efe buy 1 ring
+            // ali buy 2 bread if berk at mordor and burak and efe buy 1 ring
+            while (tokenIndex < numTokens) {
+                /*
+                if (strcmp(tokens[tokenIndex], "and") == 0) {
+                    if (strcmp(condition, "has") == 0 && !isNumeric(tokens[tokenIndex + 1])) {
+                        lastAndIndex = tokenIndex;
+                        printf("currenct sentence in has: %s\n", sentence);
+                        break;
+                    }
+                    else if (strcmp(condition, "at") == 0) {
+                        lastAndIndex = tokenIndex;
+                        printf("currenct sentence in at: %s\n", sentence);
+                        sentences[sentenceIndex++] = strdup(sentence); 
+                        break;
+                    }
+                    else {
+                        lastAndIndex = tokenIndex;
+                        sentences[sentenceIndex++] = strdup(sentence); 
+                        break;
+                    }
+                }
+                */
+
+                if (isActionWord(tokens[tokenIndex])) {
+                    for (int i = ifIndex + 1; i < lastAndIndex; i++) {
+                        strcat(sentence, tokens[i]);
+                        strcat(sentence, " ");
+                    }
+                    actionFound = true;
+                    tokenIndex = lastAndIndex;
+                    break;
+                }
+
+                if (isConditionWord(tokens[tokenIndex])) {
+                    conditionFound = true;
+                    strcat(condition, tokens[tokenIndex]);
+
+                    if (strcmp(condition, "at") == 0) {
+                        tokenIndex++;
+
+                        if (isNumeric(tokens[tokenIndex])) {
+                            printf("INVALID\n");
+                            break;
+                        }
+
+                        else {
+                            lastAndIndex = tokenIndex + 1;
+                        }
+                    }
+
+                    // ali buy 2 bread if gandalf and gollum has 6 bread and 4 water
+                    else if (strcmp(condition, "has") == 0) {
+                        tokenIndex++;
+
+                        if (strcmp(tokens[tokenIndex], "less") == 0 || strcmp(tokens[tokenIndex], "more") == 0) {
+                            tokenIndex++;
+                            if (strcmp(tokens[tokenIndex], "than") != 0) {
+                                printf("INVALID\n");
+                                break;
+                            }
+                        }
+
+                        else if (!isNumeric(tokens[tokenIndex])) {
+                            printf("INVALID\n");
+                            break;
+                        }
+
+                        //printf("ifIndex: %d\n", ifIndex);
+
+                        while ((tokenIndex < numTokens) &&  
+                                ((strcmp(tokens[tokenIndex], "and") != 0 || isNumeric(tokens[tokenIndex + 1])))) {
+                            tokenIndex++;
+                        }
+                        lastAndIndex = tokenIndex;
+                        break;
+                    }
+                }
+
+                else {
+                    tokenIndex++;
+                }
+            }
+
+            if (!actionFound) {
+                for (int i = ifIndex + 1; i < lastAndIndex; i++) {
+                    strcat(sentence, tokens[i]);
+                    strcat(sentence, " ");
+                }
+            }
+
+            sentences[sentenceIndex++] = strdup(sentence); // Allocate memory and copy string
+            if (sentences[sentenceIndex - 1] == NULL) {
+                fprintf(stderr, "Memory allocation failed\n");
+                exit(EXIT_FAILURE);
+            }
+            sentence[0] = '\0'; // Reset sentence for the next iteration
+        
         }
 
         tokenIndex++; // Move to the next token
     }
-
 
     free(sentence); // Free dynamically allocated memory for sentence
     return sentences;
