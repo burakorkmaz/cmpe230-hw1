@@ -606,9 +606,11 @@ void applySentence(char *sentence) {
             char *buyerName[10];
             buyerName[0] = buyer;
             if (!itemsExistPersonList(subjects, items, quantities, subjIndex, itemIndex)) {
-
                 printf("OK\n");
                 return;
+            }
+            else {
+            
             }
         }
     }
