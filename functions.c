@@ -261,6 +261,7 @@ void conditionWordIndex(char *tokens[], int *conditionIndex, int numTokens) {
     }
 }
 
+// THIS FUNCTION IS NOT FINISHED
 bool isIfTrue(char *ifSentence) {
     char **conditions = malloc(sizeof(char *) * 1024);
     int conditionIndex = 0;
@@ -392,6 +393,7 @@ char **parsing(char *tokens[], int numTokens) {
             sentence[0] = '\0'; 
         }
 
+        // if ali has 3 bread
         else if (strcmp(tokens[tokenIndex], "if") == 0) {
             bool conditionFound = false;
             bool actionFound = false;
@@ -470,12 +472,17 @@ char **parsing(char *tokens[], int numTokens) {
                     strcat(sentence, tokens[i]);
                     strcat(sentence, " ");
                 }
+                if (lastAndIndex == 0) {
+                    for (int i = ifIndex + 1; i < numTokens; i++) {
+                        strcat(sentence, tokens[i]);
+                        strcat(sentence, " ");
+                    }
+                }
             }
 
 
             sentences[sentenceIndex++] = strdup(sentence); 
             sentence[0] = '\0'; 
-
         }
 
         tokenIndex++; 
