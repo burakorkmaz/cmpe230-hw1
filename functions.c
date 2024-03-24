@@ -30,9 +30,6 @@ char *keywords[] = {
 char *conditionWords[] = {
     "has",
     "at"
-    //"less",
-    //"more",
-    //"than"
 };
 
 char *actions[] = {
@@ -40,11 +37,6 @@ char *actions[] = {
     "buy",
     "go"
 };
-
-/*
-"go",
-"exit"
-*/
 
 typedef struct {
     char *name;
@@ -155,50 +147,56 @@ void buy(char *name[], char *items[], int quantity[], int numItems, int numSubje
     }
 }
 
-// CHECK THIS FUNCTION
-void sell(char *name[], char *items[], int quantity[]) {
-    int numPeople = sizeof(personList) / sizeof(personList[0]);
-
-    for (int i = 0; i < numPeople; i++) {
+void sell(char *name[], char *items[], int quantity[], int numItems, int numSubjects) {
+    for (int i = 0; i < numSubjects; i++) {
+        bool personExists = false;
+        if (personCount == 0) {
+            return;
+        }
         for (int j = 0; j < personCount; j++) {
             if (strcmp(name[i], personList[j].name) == 0) {
-                for (int k = 0; k < personList[j].numItems; k++) {
-                    if (strcmp(items[i], personList[j].items[k].name) == 0) {
-                        personList[j].items[k].quantity -= quantity[i];
-                        return;
+                personExists = true;
+                for (int l = 0; l < numItems; l++) {
+                    bool itemExists = false;
+                    for (int k = 0; k < personList[j].numItems; k++) {
+                        if (strcmp(items[l], personList[j].items[k].name) == 0) {
+                            // quantity check 
+                            if (personList[j].items[k].quantity >= quantity[l]) {
+                                personList[j].items[k].quantity -= quantity[l];
+                            }
+                            else {
+                                printf("OK\n");
+                                return;
+                            }
+                            itemExists = true;
+                            break;
+                        }
                     }
-                    else {
-                        addItem(&personList[j], items[i], quantity[i]);
+                    if (!itemExists) {
+                        printf("OK\n");
                         return;
                     }
                 }
-            }
-            else {
-                createPerson(&personList[personCount], name[i]);
-                addItem(&personList[personCount - 1], items[i], quantity[i]);
-                return;
-            }
+            } 
         }
+        printf("OK\n");
     }
 }
 
-// CHECK THIS FUNCTION
-void go(char *name[], char *location[]) {
-    int numPeople = sizeof(personList) / sizeof(personList[0]);
-
-    for (int i = 0; i < numPeople; i++) {
+void go(char *name[], char *location, int numSubjects) {
+    for (int i = 0; i < numSubjects; i++) {
+        bool personExists = false;
         for (int j = 0; j < personCount; j++) {
             if (strcmp(name[i], personList[j].name) == 0) {
-                changeLocation(&personList[j], location[i]);
-                return;
-            }
-            else {
-                createPerson(&personList[personCount], name[i]);
-                changeLocation(&personList[personCount - 1], location[i]);
-                return;
+                changeLocation(&personList[j], location);
             }
         }
+        if (!personExists) {
+            createPerson(&personList[personCount], name[i]);
+            changeLocation(&personList[personCount - 1], location);
+        }
     }
+    printf("OK\n");
 }
 
 // Function to check if a string is numerical
@@ -245,34 +243,98 @@ bool isKeyword(const char *word) {
     return false;
 }
 
+bool personExists(char *name) {
+    for (int i = 0; i < personCount; i++) {
+        if (strcmp(name, personList[i].name) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void conditionWordIndex(char *tokens[], int *conditionIndex, int numTokens) {
+    for (int i = 0; i < numTokens; i++) {
+        if (isConditionWord(tokens[i])) {
+            *conditionIndex = i;
+            return;
+        }
+    }
+}
+
 bool isIfTrue(char *ifSentence) {
+    char **conditions = malloc(sizeof(char *) * 1024);
+    int conditionIndex = 0;
+    char *condition = malloc(sizeof(char) * 1024);
+    int conditionStart = 0;
+
+    char *tokens[100];
+    int numTokens = 0;
+    char *token = strtok(ifSentence, " ");
+    
+    // calculate the number of tokens using a while loop
+    while (token != NULL) {
+        tokens[numTokens] = token;
+        numTokens++;
+        token = strtok(NULL, " ");
+    }
+
+    int i = 0;
+
+    // if burak has more than 3 bread and 2 ring and ali at mordor
+    // if burak at mordor and ali has more than 3 bread and 2 ring
+    while (i < numTokens) {
+        if (strcmp(tokens[i], "if") != 0) {
+                if (isConditionWord(tokens[i])) {
+                    char *conditionWord = tokens[i];  
+                    if (strcmp(conditionWord, "at")) {
+                        i++; // location index
+                        for (int j = conditionStart; j <= i; j++) {
+                            strcat(condition, tokens[j]);
+                            strcat(condition, " ");
+                        }
+                    }
+
+                    else if (strcmp(conditionWord, "has") == 0) {
+                        if (strcmp(tokens[i + 1], "more") == 0 || strcmp(tokens[i + 1], "less") == 0) {
+                            i = i + 3; // quantity index 
+                        } 
+                        while ((i < numTokens) && (strcmp(tokens[i], "and") != 0 || isNumeric(tokens[i + 1]))) {
+                            strcat(condition, tokens[i]);
+                            strcat(condition, " ");
+                            i++;
+                        }
+                    }
+                    conditions[conditionIndex++] = strdup(condition);
+                    conditionStart = conditionStart + 2;
+                    i++; // "and" index
+                }
+        }
+        else if (strcmp(tokens[i], "if") == 0) {
+            conditionStart = i + 1;
+        }
+
+        i++;
+    }
+    printf("Conditions: ");
+    for (int i = 0; i < conditionIndex; i++) {
+        printf("Condition #%d: %s\n", i + 1, conditions[i]);
+    }
+    
     return true;
 }
 
 char **parsing(char *tokens[], int numTokens) {
     char **sentences = malloc(sizeof(char *) * 1024);
-    if (sentences == NULL) {
-        fprintf(stderr, "Memory allocation failed\n");
-        exit(EXIT_FAILURE);
-    }
     int sentenceIndex = 0;
     int tokenIndex = 0;
 
     int lastTrueIfIndex = 0;
 
     char *sentence = malloc(sizeof(char) * 1025);
-    if (sentence == NULL) {
-        fprintf(stderr, "Memory allocation failed\n");
-        exit(EXIT_FAILURE);
-    }
-    sentence[0] = '\0'; // Initialize sentence
+    sentence[0] = '\0'; 
 
     if (numTokens == 1 && strcmp(tokens[0], "exit") == 0) {
-        sentences[0] = strdup("exit"); // Allocate memory and copy string
-        if (sentences[0] == NULL) {
-            fprintf(stderr, "Memory allocation failed\n");
-            exit(EXIT_FAILURE);
-        }
+        sentences[0] = strdup("exit"); 
         exit(0);
     }
 
@@ -280,9 +342,8 @@ char **parsing(char *tokens[], int numTokens) {
         strcat(sentence, tokens[tokenIndex]);
         strcat(sentence, " ");
 
-        // ali buy 2 bread if burak at mordor
         if (strcmp(tokens[tokenIndex], "buy") == 0 || strcmp(tokens[tokenIndex], "sell") == 0) {
-            tokenIndex++; // Move to the next token
+            tokenIndex++; 
             if (!isNumeric(tokens[tokenIndex])) {
                 printf("INVALID\n");
                 break;
@@ -301,17 +362,12 @@ char **parsing(char *tokens[], int numTokens) {
                 }
             }
 
-            sentences[sentenceIndex++] = strdup(sentence); // Allocate memory and copy string
-            if (sentences[sentenceIndex - 1] == NULL) {
-                fprintf(stderr, "Memory allocation failed\n");
-                exit(EXIT_FAILURE);
-            }
-            sentence[0] = '\0'; // Reset sentence for the next iteration
+            sentences[sentenceIndex++] = strdup(sentence); 
+            sentence[0] = '\0'; 
         }
 
-        // ali go to ist
         else if (strcmp(tokens[tokenIndex], "go") == 0) {
-            tokenIndex++; // Move to the next token
+            tokenIndex++; 
 
             if (strcmp(tokens[tokenIndex], "to") != 0) {
                 printf("INVALID\n");
@@ -332,20 +388,10 @@ char **parsing(char *tokens[], int numTokens) {
                 }
             }
 
-            sentences[sentenceIndex++] = strdup(sentence); // Allocate memory and copy string
-            if (sentences[sentenceIndex - 1] == NULL) {
-                fprintf(stderr, "Memory allocation failed\n");
-                exit(EXIT_FAILURE);
-            }
-            sentence[0] = '\0'; // Reset sentence for the next iteration
+            sentences[sentenceIndex++] = strdup(sentence); 
+            sentence[0] = '\0'; 
         }
 
-        /* Frodo and Sam go to Bree and Frodo buy 3 map from Aragorn and Sam sell 2
-           dagger to Legolas if Frodo has more than 2 ring and Legolas and Gimli at Bree
-           and Frodo and Sam go to Rivendell if Aragorn has 5 map and Frodo has less than
-           5 potion and Sam has 3 dagger and Frodo sell 1 potion to Arwen and Legolas
-           and Gimli go to Rivendell */
-        // if Frodo and Sam at Mordor
         else if (strcmp(tokens[tokenIndex], "if") == 0) {
             bool conditionFound = false;
             bool actionFound = false;
@@ -356,7 +402,6 @@ char **parsing(char *tokens[], int numTokens) {
 
             tokenIndex++;
 
-            // ali buy 3 ring if burak has 3 ring and berk and bora sell 2 esek
             while (tokenIndex < numTokens) {
 
                 if (strcmp(tokens[tokenIndex], "and") == 0) {
@@ -397,7 +442,6 @@ char **parsing(char *tokens[], int numTokens) {
                         }
                     }
 
-                    // ali buy 2 bread if gandalf and gollum has 6 bread and 4 water
                     else if (strcmp(condition, "has") == 0) {
                         tokenIndex++;
 
@@ -428,27 +472,24 @@ char **parsing(char *tokens[], int numTokens) {
                 }
             }
 
-            // SEMANTIC IF ANALYSIS
 
-
-            sentences[sentenceIndex++] = strdup(sentence); // Allocate memory and copy string
-            if (sentences[sentenceIndex - 1] == NULL) {
-                fprintf(stderr, "Memory allocation failed\n");
-                exit(EXIT_FAILURE);
-            }
-            sentence[0] = '\0'; // Reset sentence for the next iteration
+            sentences[sentenceIndex++] = strdup(sentence); 
+            sentence[0] = '\0'; 
 
         }
 
-        tokenIndex++; // Move to the next token
+        tokenIndex++; 
+        if ((tokenIndex == numTokens) && !(strcmp(sentence, "") == 0)) {
+            sentences[sentenceIndex++] = strdup(sentence); 
+        }
     }
 
-    free(sentence); // Free dynamically allocated memory for sentence
+    free(sentence); 
     return sentences;
 }
 
-bool doesFromExist(char **tokens) {
-    for (int i = 0; i < sizeof(tokens) / sizeof(tokens[0]); i++) {
+bool doesFromExist(char **tokens, int numTokens) {
+    for (int i = 0; i < numTokens; i++) {
         if (strcmp(tokens[i], "from") == 0) {
             return true;
         }
@@ -456,8 +497,17 @@ bool doesFromExist(char **tokens) {
     return false;
 }
 
-void indexOfFrom(char **tokens, int *fromIndex) {
-    for (int i = 0; i < sizeof(tokens) / sizeof(tokens[0]); i++) {
+bool doesToExist(char **tokens, int numTokens) {
+    for (int i = 0; i < numTokens; i++) {
+        if (strcmp(tokens[i], "to") == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void indexOfFrom(char **tokens, int *fromIndex, int numTokens) {
+    for (int i = 0; i < numTokens; i++) {
         if (strcmp(tokens[i], "from") == 0) {
             *fromIndex = i;
             return;
@@ -465,10 +515,45 @@ void indexOfFrom(char **tokens, int *fromIndex) {
     }
 }
 
-//void buy(char *name[], char *items[], int quantity[])
-// burak and ali buy 3 bread and 5 water
+void indexOfTo(char **tokens, int *toIndex, int numTokens) {
+    for (int i = 0; i < numTokens; i++) {
+        if (strcmp(tokens[i], "to") == 0) {
+            *toIndex = i;
+            return;
+        }
+    }
+}
+
+bool itemsExistPersonList(char *names[], char *items[], int quantities[], int numNames, int numItems) {
+    for (int i = 0; i < numNames; i++) {
+        for (int j = 0; j < personCount; j++) {
+            if (strcmp(names[i], personList[j].name) == 0) {
+                for (int k = 0; k < numItems; k++) {
+                    bool itemExists = false;
+                    for (int l = 0; l < personList[j].numItems; l++) {
+                        if (strcmp(items[k], personList[j].items[l].name) == 0) {
+                            if (personList[j].items[l].quantity >= quantities[k]) {
+                                itemExists = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!itemExists) {
+                        return false;
+                    }
+                }   
+            }
+        }
+    }
+    if (personCount == 0) {
+        return false;
+    }
+
+    return true;
+}
+
 void applySentence(char *sentence) {
-    //find the index of action word
+    // find the index of action word
     int actionIndex = 0;
     int start = 0;
     int nextStart = 0;
@@ -480,6 +565,7 @@ void applySentence(char *sentence) {
     char *items[250];
     int itemIndex = 0;
     int quantities[250];
+    char *location;
     char *token = strtok(sentence, " ");
     int i = 0;
 
@@ -491,49 +577,103 @@ void applySentence(char *sentence) {
     numTokens = i;
 
     findAction(tokens, &actionIndex, numTokens);
-    //printf("Index : %d\n", actionIndex);
+    char *action = tokens[actionIndex];
+
     for(int i = 0; i < actionIndex ; i++){
         if(strcmp(tokens[i], "and") != 0) {
             subjects[subjIndex++] = tokens[i];
         }
     }
 
-    // ali buy 2 bread
-    if (!doesFromExist(tokens)) {
-        for(int j = actionIndex + 1; j < numTokens; j++) {
-            if (strcmp(tokens[j], "and") != 0)  {
-                if (!isNumeric(tokens[j])) {
-                    items[itemIndex++] = tokens[j];
-                }
-                else {
-                    quantities[itemIndex] = atoi(tokens[j]);
-                }
-            }
-        }
-    }
-
-    else {
-        int fromIndex;
-        indexOfFrom(tokens, &fromIndex);
-        for(int j = actionIndex + 1; j < fromIndex; j++) {
-            if (strcmp(tokens[j], "and") != 0)  {
-                if (!isNumeric(tokens[j])) {
-                    items[itemIndex++] = tokens[j];
-                }
-                else {
-                    quantities[itemIndex] = atoi(tokens[j]);
-                }
-            }
-        }
-        char *seller = tokens[fromIndex + 1];
-        char *sellerName[100];
-        strcpy(sellerName[0], seller);
-    }
-
-    char *action = tokens[actionIndex];
-
     if (strcmp(action, "buy") == 0) {
-        buy(subjects, items, quantities, itemIndex, subjIndex);
+        if (!doesFromExist(tokens, numTokens)) {
+            for(int j = actionIndex + 1; j < numTokens; j++) {
+                if (strcmp(tokens[j], "and") != 0)  {
+                    if (!isNumeric(tokens[j])) {
+                        items[itemIndex++] = tokens[j];
+                    }
+                    else {
+                        quantities[itemIndex] = atoi(tokens[j]);
+                    }
+                }
+            }
+            buy(subjects, items, quantities, itemIndex, subjIndex);
+        }
+
+        else {
+            int fromIndex;
+            indexOfFrom(tokens, &fromIndex, numTokens);
+            for(int j = actionIndex + 1; j < fromIndex; j++) {
+                if (strcmp(tokens[j], "and") != 0)  {
+                    if (!isNumeric(tokens[j])) {
+                        items[itemIndex++] = tokens[j];
+                    }
+                    else {
+                        quantities[itemIndex] = atoi(tokens[j]);
+                    }
+                }
+            }
+            char *seller = tokens[fromIndex + 1];
+            char *sellerName[10];
+            sellerName[0] = seller;
+
+            if (!itemsExistPersonList(sellerName, items, quantities, 1, itemIndex)) {
+                printf("OK\n");
+                return;
+            }
+            else {
+                buy(subjects, items, quantities, itemIndex, subjIndex);
+                sell(sellerName, items, quantities, itemIndex, 1);
+            }
+        }
+    }
+
+    else if (strcmp(action, "sell") == 0) {
+        if (!doesToExist(tokens, numTokens)) {
+            for(int j = actionIndex + 1; j < numTokens; j++) {
+                if (strcmp(tokens[j], "and") != 0)  {
+                    if (!isNumeric(tokens[j])) {
+                        items[itemIndex++] = tokens[j];
+                    }
+                    else {
+                        quantities[itemIndex] = atoi(tokens[j]);
+                    }
+                }
+            }
+            sell(subjects, items, quantities, itemIndex, subjIndex);
+        }
+
+        else {
+            int toIndex;
+            indexOfTo(tokens, &toIndex, numTokens);
+            for(int j = actionIndex + 1; j < toIndex; j++) {
+                if (strcmp(tokens[j], "and") != 0) {
+                    if (!isNumeric(tokens[j])) {
+                        items[itemIndex++] = tokens[j];
+                    }
+                    else {
+                        quantities[itemIndex] = atoi(tokens[j]);
+                    }
+                }
+            }
+
+            char *buyer = tokens[toIndex + 1];
+            char *buyerName[10];
+            buyerName[0] = buyer;
+            if (!itemsExistPersonList(subjects, items, quantities, subjIndex, itemIndex)) {
+                printf("OK\n");
+                return;
+            }
+            else {
+                sell(subjects, items, quantities, itemIndex, subjIndex);
+                buy(buyerName, items, quantities, itemIndex, 1);
+            }
+        }
+    }
+
+    else if (strcmp(action, "go") == 0) {
+        location = tokens[actionIndex + 2];
+        go(subjects, location, subjIndex);
     }
 }
 
@@ -543,7 +683,6 @@ void printPersonList() {
     }
 }
 
-// burak buy 2 bread
 void semanticAnalysis(char **sentences) {
     int sentenceIndex = 0;
     int ifIndex = 0;
@@ -601,5 +740,6 @@ void semanticAnalysis(char **sentences) {
             x++;
         }
     }
+    printf("--------------------\n");
     printPersonList();
 }
