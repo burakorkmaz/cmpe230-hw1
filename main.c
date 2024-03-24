@@ -29,7 +29,6 @@ int main() {
         printf("%s\n", parsedTokens[i]);
     }
     semanticAnalysis(parsedTokens);
-    
 
     return 0;
 }
