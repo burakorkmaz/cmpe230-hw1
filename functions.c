@@ -281,13 +281,12 @@ bool isIfTrue(char *ifSentence) {
 
     int i = 0;
 
-    // if burak has more than 3 bread and 2 ring and ali at mordor
-    // if burak at mordor and ali has more than 3 bread and 2 ring
+    // if ali has 3 bread and 5 ring and burak at mordor
     while (i < numTokens) {
         if (strcmp(tokens[i], "if") != 0) {
                 if (isConditionWord(tokens[i])) {
                     char *conditionWord = tokens[i];  
-                    if (strcmp(conditionWord, "at")) {
+                    if (strcmp(conditionWord, "at") == 0) {
                         i++; // location index
                         for (int j = conditionStart; j <= i; j++) {
                             strcat(condition, tokens[j]);
@@ -295,6 +294,7 @@ bool isIfTrue(char *ifSentence) {
                         }
                     }
 
+                    // ali buy 3 bread if burak has 3 ring
                     else if (strcmp(conditionWord, "has") == 0) {
                         if (strcmp(tokens[i + 1], "more") == 0 || strcmp(tokens[i + 1], "less") == 0) {
                             i = i + 3; // quantity index 
@@ -306,8 +306,13 @@ bool isIfTrue(char *ifSentence) {
                         }
                     }
                     conditions[conditionIndex++] = strdup(condition);
-                    conditionStart = conditionStart + 2;
+                    conditionStart = i + 1;
+                    condition[0] = '\0';
                     i++; // "and" index
+                }
+                else {
+                    strcat(condition, tokens[i]);
+                    strcat(condition, " ");
                 }
         }
         else if (strcmp(tokens[i], "if") == 0) {
@@ -316,7 +321,7 @@ bool isIfTrue(char *ifSentence) {
 
         i++;
     }
-    printf("Conditions: ");
+    printf("Conditions: \n");
     for (int i = 0; i < conditionIndex; i++) {
         printf("Condition #%d: %s\n", i + 1, conditions[i]);
     }
