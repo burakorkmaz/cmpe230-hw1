@@ -295,9 +295,15 @@ bool isIfTrue(char *ifSentence) {
                     }
 
                     // ali buy 3 bread if burak has 3 ring
+                    // if bora has more than 4 ring and burak has 2 efe 
                     else if (strcmp(conditionWord, "has") == 0) {
                         if (strcmp(tokens[i + 1], "more") == 0 || strcmp(tokens[i + 1], "less") == 0) {
-                            i = i + 3; // quantity index 
+                            strcat(condition, tokens[i++]);
+                            strcat(condition, " ");
+                            strcat(condition, tokens[i++]);
+                            strcat(condition, " ");
+                            strcat(condition, tokens[i++]);
+                            strcat(condition, " ");
                         } 
                         while ((i < numTokens) && (strcmp(tokens[i], "and") != 0 || isNumeric(tokens[i + 1]))) {
                             strcat(condition, tokens[i]);
@@ -308,7 +314,6 @@ bool isIfTrue(char *ifSentence) {
                     conditions[conditionIndex++] = strdup(condition);
                     conditionStart = i + 1;
                     condition[0] = '\0';
-                    i++; // "and" index
                 }
                 else {
                     strcat(condition, tokens[i]);
