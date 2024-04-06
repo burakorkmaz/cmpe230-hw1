@@ -262,12 +262,29 @@ void conditionWordIndex(char *tokens[], int *conditionIndex, int numTokens) {
     }
 }
 
+bool checkAtCondition(char *people[], int numPeople, char *location) {
+    for (int i = 0; i < numPeople; i++) {
+        for (int j = 0; j < personCount; j++) {
+            if (strcmp(people[i], personList[j].name) == 0) {
+                if (strcmp(personList[j].location.name, location) != 0) {
+                    return false;
+                }
+                else {
+                    continue;
+                }
+            }
+        }
+    }
+    return true;
+}
+
 // THIS FUNCTION IS NOT FINISHED
 bool isIfTrue(char *ifSentence) {
     char **conditions = malloc(sizeof(char *) * 1024);
     int conditionIndex = 0;
     char *condition = malloc(sizeof(char) * 1024);
     int conditionStart = 0;
+    int conditionNum = 0;
 
     char *tokens[100];
     int numTokens = 0;
@@ -292,12 +309,21 @@ bool isIfTrue(char *ifSentence) {
                         strcat(condition, " ");
                         strcat(condition, tokens[i++]);
                         strcat(condition, " ");
+                        strcat(condition, "0");
+                        conditionNum++;
                     }
 
                     // ali buy 3 bread if burak has 3 ring
                     // if bora has more than 4 ring and burak has 2 efe 
                     else if (strcmp(conditionWord, "has") == 0) {
+                        char word[10] = "1";
                         if (strcmp(tokens[i + 1], "more") == 0 || strcmp(tokens[i + 1], "less") == 0) {
+                            if(strcmp(tokens[i+1], "more") == 0){
+                                strcpy(word, "2");
+                            }
+                            else{
+                                strcpy(word, "3");
+                            }    
                             strcat(condition, tokens[i++]);
                             strcat(condition, " ");
                             strcat(condition, tokens[i++]);
@@ -310,6 +336,8 @@ bool isIfTrue(char *ifSentence) {
                             strcat(condition, " ");
                             i++;
                         }
+                        strcat(condition, word);
+                        conditionNum++;
                     }
                     conditions[conditionIndex++] = strdup(condition);
                     conditionStart = i + 1;
@@ -330,6 +358,57 @@ bool isIfTrue(char *ifSentence) {
     printf("Conditions: \n");
     for (int i = 0; i < conditionIndex; i++) {
         printf("Condition #%d: %s\n", i + 1, conditions[i]);
+    }
+
+    for (int i = 0; i < conditionNum; i++) {
+        char *condition = malloc(sizeof(char) * 1024);
+        condition = conditions[i];
+
+        char conditionType = condition[strlen(condition) - 1]; 
+
+        condition[strlen(condition)] = '\0';
+        condition[strlen(condition) - 1] = '\0';
+
+        int conditionWordIndex = 0;
+
+        char *tokens[100];
+        int numTokens = 0;
+        char *token = strtok(condition, " ");
+
+        while (token != NULL) {
+            if (isConditionWord(token)) {
+                conditionWordIndex = numTokens;
+                printf("%d \n", conditionWordIndex);
+            }
+            tokens[numTokens] = token;
+            numTokens++;
+            token = strtok(NULL, " ");
+        }
+
+        char **people = malloc(sizeof(char *) * 1024);
+        char *location = malloc(sizeof(char) * 1024);
+        int numPeople = 0;
+
+        for (int j = 0; j < conditionWordIndex; j++) {
+            if (strcmp(tokens[j], "and") != 0) {
+                printf("token: %s\n", tokens[j]);
+                people[numPeople] = tokens[j];
+                numPeople++;
+            }
+        }
+
+        if (conditionType == '0') {
+            int conditionIndex = 0;
+            
+            strcpy(location, tokens[conditionWordIndex + 1]);
+            if (!checkAtCondition(people, numPeople, location)) {
+                printf("not there\n");
+            }
+            else {
+                printf("there\n");
+            }
+        }
+        free(people);
     }
     
     return true;
