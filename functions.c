@@ -575,6 +575,7 @@ bool itemsExistPersonList(char *names[], char *items[], int quantities[], int nu
 
 void applySentence(char *sentence) {
     // find the index of action word
+    printf("sentence in applySentence: %s\n", sentence);
     int actionIndex = 0;
     int start = 0;
     int nextStart = 0;
@@ -696,6 +697,8 @@ void applySentence(char *sentence) {
         location = tokens[actionIndex + 2];
         go(subjects, location, subjIndex);
     }
+
+    printf("sentence after applySentence: %s\n", sentence);
 }
 
 void printPersonList() {
@@ -716,32 +719,30 @@ void semanticAnalysis(char **sentences) {
         char *sentence = malloc(sizeof(char) * 1025);
         sentence = sentences[i];
 
+        printf("sentence: %s\n", sentence);
+
         // hold the first and second letter of the sentence
         char *firstTwoLetters = malloc(sizeof(char) * 2);
         firstTwoLetters[0] = sentence[0];
         firstTwoLetters[1] = sentence[1];
 
         if (firstTwoLetters[0] == 'i' && firstTwoLetters[1] == 'f') {
-            printf("girdim\n");
             ifIndex = i;
             isIfFound = true;
             doesIfExist = true;
         }
         free(firstTwoLetters);
 
-        printf("Sentence: %s\n", sentence);
-
-        printf("ifIndex: %d\n", ifIndex);
-        printf("sentenceIndex: %d\n", sentenceIndex);
-
+        // find out why the sentence changes. here and also in the applySentence function
         if (ifIndex != sentenceIndex) {
-            printf("ifSentence: %s\n", sentences[ifIndex]);
-            if (isIfTrue(sentences[ifIndex])) {
-                for (int j = sentenceIndex; sentenceIndex < ifIndex; j++) {
+            printf("if sentence: %s\n", sentences[ifIndex]);
+            if (strlen(sentences[ifIndex]) != 2 && isIfTrue(sentences[ifIndex])) {
+                for (int j = sentenceIndex; j < ifIndex; j++) {
                     applySentence(sentences[j]);
                 }
                 sentenceIndex = ifIndex + 1;
             }
+            printf("if sentence after: %s\n", sentences[ifIndex]);
         }
 
         if (isIfFound) {
