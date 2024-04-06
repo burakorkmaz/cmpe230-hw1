@@ -722,22 +722,15 @@ void semanticAnalysis(char **sentences) {
         firstTwoLetters[1] = sentence[1];
 
         if (firstTwoLetters[0] == 'i' && firstTwoLetters[1] == 'f') {
-            printf("girdim\n");
             ifIndex = i;
             isIfFound = true;
             doesIfExist = true;
         }
         free(firstTwoLetters);
 
-        printf("Sentence: %s\n", sentence);
-
-        printf("ifIndex: %d\n", ifIndex);
-        printf("sentenceIndex: %d\n", sentenceIndex);
-
         if (ifIndex != sentenceIndex) {
-            printf("ifSentence: %s\n", sentences[ifIndex]);
             if (isIfTrue(sentences[ifIndex])) {
-                for (int j = sentenceIndex; sentenceIndex < ifIndex; j++) {
+                for (int j = sentenceIndex; j < ifIndex; j++) {
                     applySentence(sentences[j]);
                 }
                 sentenceIndex = ifIndex + 1;
