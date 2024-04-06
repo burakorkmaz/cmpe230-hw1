@@ -261,6 +261,7 @@ void conditionWordIndex(char *tokens[], int *conditionIndex, int numTokens) {
     }
 }
 
+// THIS FUNCTION IS NOT FINISHED
 bool isIfTrue(char *ifSentence) {
     char **conditions = malloc(sizeof(char *) * 1024);
     int conditionIndex = 0;
@@ -280,13 +281,12 @@ bool isIfTrue(char *ifSentence) {
 
     int i = 0;
 
-    // if burak has more than 3 bread and 2 ring and ali at mordor
-    // if burak at mordor and ali has more than 3 bread and 2 ring
+    // if ali has 3 bread and 5 ring and burak at mordor
     while (i < numTokens) {
         if (strcmp(tokens[i], "if") != 0) {
                 if (isConditionWord(tokens[i])) {
                     char *conditionWord = tokens[i];  
-                    if (strcmp(conditionWord, "at")) {
+                    if (strcmp(conditionWord, "at") == 0) {
                         i++; // location index
                         for (int j = conditionStart; j <= i; j++) {
                             strcat(condition, tokens[j]);
@@ -294,9 +294,16 @@ bool isIfTrue(char *ifSentence) {
                         }
                     }
 
+                    // ali buy 3 bread if burak has 3 ring
+                    // if bora has more than 4 ring and burak has 2 efe 
                     else if (strcmp(conditionWord, "has") == 0) {
                         if (strcmp(tokens[i + 1], "more") == 0 || strcmp(tokens[i + 1], "less") == 0) {
-                            i = i + 3; // quantity index 
+                            strcat(condition, tokens[i++]);
+                            strcat(condition, " ");
+                            strcat(condition, tokens[i++]);
+                            strcat(condition, " ");
+                            strcat(condition, tokens[i++]);
+                            strcat(condition, " ");
                         } 
                         while ((i < numTokens) && (strcmp(tokens[i], "and") != 0 || isNumeric(tokens[i + 1]))) {
                             strcat(condition, tokens[i]);
@@ -305,8 +312,12 @@ bool isIfTrue(char *ifSentence) {
                         }
                     }
                     conditions[conditionIndex++] = strdup(condition);
-                    conditionStart = conditionStart + 2;
-                    i++; // "and" index
+                    conditionStart = i + 1;
+                    condition[0] = '\0';
+                }
+                else {
+                    strcat(condition, tokens[i]);
+                    strcat(condition, " ");
                 }
         }
         else if (strcmp(tokens[i], "if") == 0) {
@@ -315,7 +326,7 @@ bool isIfTrue(char *ifSentence) {
 
         i++;
     }
-    printf("Conditions: ");
+    printf("Conditions: \n");
     for (int i = 0; i < conditionIndex; i++) {
         printf("Condition #%d: %s\n", i + 1, conditions[i]);
     }
@@ -392,6 +403,7 @@ char **parsing(char *tokens[], int numTokens) {
             sentence[0] = '\0'; 
         }
 
+        // if ali has 3 bread
         else if (strcmp(tokens[tokenIndex], "if") == 0) {
             bool conditionFound = false;
             bool actionFound = false;
@@ -465,17 +477,26 @@ char **parsing(char *tokens[], int numTokens) {
                 }
             }
 
+            if (tokenIndex >= numTokens - 1) {
+                lastAndIndex = numTokens;
+            }
+
             if (!actionFound) {
                 for (int i = ifIndex + 1; i < lastAndIndex; i++) {
                     strcat(sentence, tokens[i]);
                     strcat(sentence, " ");
+                }
+                if (lastAndIndex == 0) {
+                    for (int i = ifIndex + 1; i < numTokens; i++) {
+                        strcat(sentence, tokens[i]);
+                        strcat(sentence, " ");
+                    }
                 }
             }
 
 
             sentences[sentenceIndex++] = strdup(sentence); 
             sentence[0] = '\0'; 
-
         }
 
         tokenIndex++; 
@@ -700,23 +721,31 @@ void semanticAnalysis(char **sentences) {
         firstTwoLetters[0] = sentence[0];
         firstTwoLetters[1] = sentence[1];
 
-        if (strcmp(firstTwoLetters, "if") == 0) {
+        if (firstTwoLetters[0] == 'i' && firstTwoLetters[1] == 'f') {
+            printf("girdim\n");
             ifIndex = i;
             isIfFound = true;
             doesIfExist = true;
         }
+        free(firstTwoLetters);
+
+        printf("Sentence: %s\n", sentence);
+
+        printf("ifIndex: %d\n", ifIndex);
+        printf("sentenceIndex: %d\n", sentenceIndex);
 
         if (ifIndex != sentenceIndex) {
+            printf("ifSentence: %s\n", sentences[ifIndex]);
             if (isIfTrue(sentences[ifIndex])) {
                 for (int j = sentenceIndex; sentenceIndex < ifIndex; j++) {
                     applySentence(sentences[j]);
                 }
-                sentenceIndex = ifIndex;
+                sentenceIndex = ifIndex + 1;
             }
         }
 
         if (isIfFound) {
-            i = ifIndex;
+            i = ifIndex + 1;
             isIfFound = false;
         }
 
