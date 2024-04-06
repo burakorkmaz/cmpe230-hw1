@@ -189,6 +189,7 @@ void go(char *name[], char *location, int numSubjects) {
         for (int j = 0; j < personCount; j++) {
             if (strcmp(name[i], personList[j].name) == 0) {
                 changeLocation(&personList[j], location);
+                personExists = true;
             }
         }
         if (!personExists) {
@@ -287,11 +288,10 @@ bool isIfTrue(char *ifSentence) {
                 if (isConditionWord(tokens[i])) {
                     char *conditionWord = tokens[i];  
                     if (strcmp(conditionWord, "at") == 0) {
-                        i++; // location index
-                        for (int j = conditionStart; j <= i; j++) {
-                            strcat(condition, tokens[j]);
-                            strcat(condition, " ");
-                        }
+                        strcat(condition, tokens[i++]);
+                        strcat(condition, " ");
+                        strcat(condition, tokens[i++]);
+                        strcat(condition, " ");
                     }
 
                     // ali buy 3 bread if burak has 3 ring
@@ -326,6 +326,7 @@ bool isIfTrue(char *ifSentence) {
 
         i++;
     }
+
     printf("Conditions: \n");
     for (int i = 0; i < conditionIndex; i++) {
         printf("Condition #%d: %s\n", i + 1, conditions[i]);
@@ -575,7 +576,7 @@ bool itemsExistPersonList(char *names[], char *items[], int quantities[], int nu
 
 void applySentence(char *sentence) {
     // find the index of action word
-    printf("sentence in applySentence: %s\n", sentence);
+    // printf("sentence in applySentence: %s\n", sentence);
     int actionIndex = 0;
     int start = 0;
     int nextStart = 0;
@@ -698,7 +699,7 @@ void applySentence(char *sentence) {
         go(subjects, location, subjIndex);
     }
 
-    printf("sentence after applySentence: %s\n", sentence);
+    // printf("sentence after applySentence: %s\n", sentence);
 }
 
 void printPersonList() {
@@ -719,7 +720,7 @@ void semanticAnalysis(char **sentences) {
         char *sentence = malloc(sizeof(char) * 1025);
         sentence = sentences[i];
 
-        printf("sentence: %s\n", sentence);
+        // printf("sentence: %s\n", sentence);
 
         // hold the first and second letter of the sentence
         char *firstTwoLetters = malloc(sizeof(char) * 2);
@@ -735,14 +736,14 @@ void semanticAnalysis(char **sentences) {
 
         // find out why the sentence changes. here and also in the applySentence function
         if (ifIndex != sentenceIndex) {
-            printf("if sentence: %s\n", sentences[ifIndex]);
+            // printf("if sentence: %s\n", sentences[ifIndex]);
             if (strlen(sentences[ifIndex]) != 2 && isIfTrue(sentences[ifIndex])) {
                 for (int j = sentenceIndex; j < ifIndex; j++) {
                     applySentence(sentences[j]);
                 }
                 sentenceIndex = ifIndex + 1;
             }
-            printf("if sentence after: %s\n", sentences[ifIndex]);
+            // printf("if sentence after: %s\n", sentences[ifIndex]);
         }
 
         if (isIfFound) {
