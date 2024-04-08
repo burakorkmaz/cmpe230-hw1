@@ -414,217 +414,6 @@ bool isIfTrue(char *ifSentence) {
     return true;
 }
 
-char **parsing(char *tokens[], int numTokens) {
-    char **sentences = malloc(sizeof(char *) * 1024);
-    int sentenceIndex = 0;
-    int tokenIndex = 0;
-
-    int lastTrueIfIndex = 0;
-
-    char *sentence = malloc(sizeof(char) * 1025);
-    sentence[0] = '\0'; 
-
-    if (numTokens == 1 && strcmp(tokens[0], "exit") == 0) {
-        sentences[0] = strdup("exit"); 
-        exit(0);
-    }
-
-    while (tokenIndex < numTokens) {
-        strcat(sentence, tokens[tokenIndex]);
-        strcat(sentence, " ");
-
-        if (strcmp(tokens[tokenIndex], "buy") == 0 || strcmp(tokens[tokenIndex], "sell") == 0) {
-            tokenIndex++; 
-            if (!isNumeric(tokens[tokenIndex])) {
-                printf("INVALID\n");
-                break;
-            }
-
-            strcat(sentence, tokens[tokenIndex]);
-            strcat(sentence, " ");
-
-            // Check for additional items to buy
-            while ((tokenIndex + 1 < numTokens) && (strcmp(tokens[tokenIndex + 1], "if") != 0) &&
-                    ((strcmp(tokens[tokenIndex], "and") != 0 || isNumeric(tokens[tokenIndex + 1])))) {
-                tokenIndex++;
-                if(strcmp(tokens[tokenIndex], "and") != 0) {
-                    strcat(sentence, tokens[tokenIndex]);
-                    strcat(sentence, " ");
-                }
-            }
-
-            sentences[sentenceIndex++] = strdup(sentence); 
-            sentence[0] = '\0'; 
-        }
-
-        else if (strcmp(tokens[tokenIndex], "go") == 0) {
-            tokenIndex++; 
-
-            if (strcmp(tokens[tokenIndex], "to") != 0) {
-                printf("INVALID\n");
-                break;
-            }
-
-            // Add "to" to sentence
-            strcat(sentence, tokens[tokenIndex++]);
-            strcat(sentence, " ");
-
-            // Add location to sentence
-            strcat(sentence, tokens[tokenIndex]);
-            strcat(sentence, " ");
-
-            if (tokenIndex + 1 < numTokens) {
-                if (strcmp(tokens[tokenIndex + 1], "and") == 0) {
-                    tokenIndex++;
-                }
-            }
-
-            sentences[sentenceIndex++] = strdup(sentence); 
-            sentence[0] = '\0'; 
-        }
-
-        // if ali has 3 bread
-        else if (strcmp(tokens[tokenIndex], "if") == 0) {
-            bool conditionFound = false;
-            bool actionFound = false;
-            char *condition = malloc(sizeof(char) * 10);
-
-            int ifIndex = tokenIndex;
-            int lastAndIndex = 0;
-
-            tokenIndex++;
-
-            while (tokenIndex < numTokens) {
-
-                if (strcmp(tokens[tokenIndex], "and") == 0) {
-                    if (strcmp(condition, "has") == 0 && !isNumeric(tokens[tokenIndex + 1])) {
-                        lastAndIndex = tokenIndex;
-                        strcpy(condition, "");
-                    }
-                    else if (strcmp(condition, "at") == 0) {
-                        lastAndIndex = tokenIndex;
-                        strcpy(condition, "");
-                    }
-                }
-
-                if (isActionWord(tokens[tokenIndex])) {
-                    for (int i = ifIndex + 1; i < lastAndIndex; i++) {
-                        strcat(sentence, tokens[i]);
-                        strcat(sentence, " ");
-                    }
-                    actionFound = true;
-                    tokenIndex = lastAndIndex;
-                    break;
-                }
-
-                if (isConditionWord(tokens[tokenIndex])) {
-                    conditionFound = true;
-                    strcpy(condition, tokens[tokenIndex]);
-
-                    if (strcmp(condition, "at") == 0) {
-                        tokenIndex++;
-
-                        if (isNumeric(tokens[tokenIndex])) {
-                            printf("INVALID\n");
-                            break;
-                        }
-
-                        else {
-                            lastAndIndex = tokenIndex + 1;
-                        }
-                    }
-
-                    else if (strcmp(condition, "has") == 0) {
-                        tokenIndex++;
-
-                        if (strcmp(tokens[tokenIndex], "less") == 0 || strcmp(tokens[tokenIndex], "more") == 0) {
-                            tokenIndex++;
-                            if (strcmp(tokens[tokenIndex], "than") != 0) {
-                                printf("INVALID\n");
-                                break;
-                            }
-                        }
-
-                        else if (!isNumeric(tokens[tokenIndex])) {
-                            printf("INVALID\n");
-                            break;
-                        }
-                    }
-                }
-
-                else {
-                    tokenIndex++;
-                }
-            }
-
-            if (tokenIndex >= numTokens - 1) {
-                lastAndIndex = numTokens;
-            }
-
-            if (!actionFound) {
-                for (int i = ifIndex + 1; i < lastAndIndex; i++) {
-                    strcat(sentence, tokens[i]);
-                    strcat(sentence, " ");
-                }
-                if (lastAndIndex == 0) {
-                    for (int i = ifIndex + 1; i < numTokens; i++) {
-                        strcat(sentence, tokens[i]);
-                        strcat(sentence, " ");
-                    }
-                }
-            }
-
-
-            sentences[sentenceIndex++] = strdup(sentence); 
-            sentence[0] = '\0'; 
-        }
-
-        tokenIndex++; 
-        if ((tokenIndex == numTokens) && !(strcmp(sentence, "") == 0)) {
-            sentences[sentenceIndex++] = strdup(sentence); 
-        }
-    }
-
-    free(sentence); 
-    return sentences;
-}
-
-bool doesFromExist(char **tokens, int numTokens) {
-    for (int i = 0; i < numTokens; i++) {
-        if (strcmp(tokens[i], "from") == 0) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool doesToExist(char **tokens, int numTokens) {
-    for (int i = 0; i < numTokens; i++) {
-        if (strcmp(tokens[i], "to") == 0) {
-            return true;
-        }
-    }
-    return false;
-}
-
-void indexOfFrom(char **tokens, int *fromIndex, int numTokens) {
-    for (int i = 0; i < numTokens; i++) {
-        if (strcmp(tokens[i], "from") == 0) {
-            *fromIndex = i;
-            return;
-        }
-    }
-}
-
-void indexOfTo(char **tokens, int *toIndex, int numTokens) {
-    for (int i = 0; i < numTokens; i++) {
-        if (strcmp(tokens[i], "to") == 0) {
-            *toIndex = i;
-            return;
-        }
-    }
-}
-
 int getTotalItem(char *names[], int numPeople, char *item){
     int total = 0;
     for(int i = 0 ; i < numPeople;i++ ){
@@ -686,6 +475,225 @@ char *totalInventory(char *name){
     sentence[strlen(sentence) - 5] = '\0';
     return sentence;
 }
+
+char **parsing(char *tokens[], int numTokens) {
+    char **sentences = malloc(sizeof(char *) * 1024);
+    int sentenceIndex = 0;
+    int tokenIndex = 0;
+
+    int lastTrueIfIndex = 0;
+
+    char *sentence = malloc(sizeof(char) * 1025);
+    sentence[0] = '\0'; 
+
+    if (numTokens == 1 && strcmp(tokens[0], "exit") == 0) {
+        sentences[0] = strdup("exit"); 
+        exit(0);
+    }
+
+    if(strcmp(tokens[numTokens -1], "?") == 0){
+        if(strcmp(tokens[numTokens -3], "total") == 0){
+        printf("1\n");
+        }
+        else if (strcmp(tokens[numTokens -2], "where") == 0){
+            printf("%s\n", whereIsTheSubject(tokens[0]));
+        }
+        else if (strcmp(tokens[0], "Who") == 0 && strcmp(tokens[1], "at") == 0){
+            printf("%s\n", whoAtLocation(tokens[2]));
+        }
+        else if(strcmp(tokens[numTokens -2], "total") == 0){
+            printf("%s\n", totalInventory(tokens[0]));
+        }
+
+        printf("ASDSA\n");
+    }else {
+        while (tokenIndex < numTokens) {
+            strcat(sentence, tokens[tokenIndex]);
+            strcat(sentence, " ");
+
+            if (strcmp(tokens[tokenIndex], "buy") == 0 || strcmp(tokens[tokenIndex], "sell") == 0) {
+                tokenIndex++;
+                if (!isNumeric(tokens[tokenIndex])) {
+                    printf("INVALID\n");
+                    break;
+                }
+
+                strcat(sentence, tokens[tokenIndex]);
+                strcat(sentence, " ");
+
+                // Check for additional items to buy
+                while ((tokenIndex + 1 < numTokens) && (strcmp(tokens[tokenIndex + 1], "if") != 0) &&
+                       ((strcmp(tokens[tokenIndex], "and") != 0 || isNumeric(tokens[tokenIndex + 1])))) {
+                    tokenIndex++;
+                    if (strcmp(tokens[tokenIndex], "and") != 0) {
+                        strcat(sentence, tokens[tokenIndex]);
+                        strcat(sentence, " ");
+                    }
+                }
+
+                sentences[sentenceIndex++] = strdup(sentence);
+                sentence[0] = '\0';
+            } else if (strcmp(tokens[tokenIndex], "go") == 0) {
+                tokenIndex++;
+
+                if (strcmp(tokens[tokenIndex], "to") != 0) {
+                    printf("INVALID\n");
+                    break;
+                }
+
+                // Add "to" to sentence
+                strcat(sentence, tokens[tokenIndex++]);
+                strcat(sentence, " ");
+
+                // Add location to sentence
+                strcat(sentence, tokens[tokenIndex]);
+                strcat(sentence, " ");
+
+                if (tokenIndex + 1 < numTokens) {
+                    if (strcmp(tokens[tokenIndex + 1], "and") == 0) {
+                        tokenIndex++;
+                    }
+                }
+
+                sentences[sentenceIndex++] = strdup(sentence);
+                sentence[0] = '\0';
+            }
+
+                // if ali has 3 bread
+            else if (strcmp(tokens[tokenIndex], "if") == 0) {
+                bool conditionFound = false;
+                bool actionFound = false;
+                char *condition = malloc(sizeof(char) * 10);
+
+                int ifIndex = tokenIndex;
+                int lastAndIndex = 0;
+
+                tokenIndex++;
+
+                while (tokenIndex < numTokens) {
+
+                    if (strcmp(tokens[tokenIndex], "and") == 0) {
+                        if (strcmp(condition, "has") == 0 && !isNumeric(tokens[tokenIndex + 1])) {
+                            lastAndIndex = tokenIndex;
+                            strcpy(condition, "");
+                        } else if (strcmp(condition, "at") == 0) {
+                            lastAndIndex = tokenIndex;
+                            strcpy(condition, "");
+                        }
+                    }
+
+                    if (isActionWord(tokens[tokenIndex])) {
+                        for (int i = ifIndex + 1; i < lastAndIndex; i++) {
+                            strcat(sentence, tokens[i]);
+                            strcat(sentence, " ");
+                        }
+                        actionFound = true;
+                        tokenIndex = lastAndIndex;
+                        break;
+                    }
+
+                    if (isConditionWord(tokens[tokenIndex])) {
+                        conditionFound = true;
+                        strcpy(condition, tokens[tokenIndex]);
+
+                        if (strcmp(condition, "at") == 0) {
+                            tokenIndex++;
+
+                            if (isNumeric(tokens[tokenIndex])) {
+                                printf("INVALID\n");
+                                break;
+                            } else {
+                                lastAndIndex = tokenIndex + 1;
+                            }
+                        } else if (strcmp(condition, "has") == 0) {
+                            tokenIndex++;
+
+                            if (strcmp(tokens[tokenIndex], "less") == 0 || strcmp(tokens[tokenIndex], "more") == 0) {
+                                tokenIndex++;
+                                if (strcmp(tokens[tokenIndex], "than") != 0) {
+                                    printf("INVALID\n");
+                                    break;
+                                }
+                            } else if (!isNumeric(tokens[tokenIndex])) {
+                                printf("INVALID\n");
+                                break;
+                            }
+                        }
+                    } else {
+                        tokenIndex++;
+                    }
+                }
+
+                if (tokenIndex >= numTokens - 1) {
+                    lastAndIndex = numTokens;
+                }
+
+                if (!actionFound) {
+                    for (int i = ifIndex + 1; i < lastAndIndex; i++) {
+                        strcat(sentence, tokens[i]);
+                        strcat(sentence, " ");
+                    }
+                    if (lastAndIndex == 0) {
+                        for (int i = ifIndex + 1; i < numTokens; i++) {
+                            strcat(sentence, tokens[i]);
+                            strcat(sentence, " ");
+                        }
+                    }
+                }
+
+
+                sentences[sentenceIndex++] = strdup(sentence);
+                sentence[0] = '\0';
+            }
+
+            tokenIndex++;
+            if ((tokenIndex == numTokens) && !(strcmp(sentence, "") == 0)) {
+                sentences[sentenceIndex++] = strdup(sentence);
+            }
+        }
+
+        free(sentence);
+    }
+    return sentences;
+}
+
+bool doesFromExist(char **tokens, int numTokens) {
+    for (int i = 0; i < numTokens; i++) {
+        if (strcmp(tokens[i], "from") == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool doesToExist(char **tokens, int numTokens) {
+    for (int i = 0; i < numTokens; i++) {
+        if (strcmp(tokens[i], "to") == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void indexOfFrom(char **tokens, int *fromIndex, int numTokens) {
+    for (int i = 0; i < numTokens; i++) {
+        if (strcmp(tokens[i], "from") == 0) {
+            *fromIndex = i;
+            return;
+        }
+    }
+}
+
+void indexOfTo(char **tokens, int *toIndex, int numTokens) {
+    for (int i = 0; i < numTokens; i++) {
+        if (strcmp(tokens[i], "to") == 0) {
+            *toIndex = i;
+            return;
+        }
+    }
+}
+
+
 
 
 bool itemsExistPersonList(char *names[], char *items[], int quantities[], int numNames, int numItems) {
