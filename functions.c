@@ -189,6 +189,7 @@ void go(char *name[], char *location, int numSubjects) {
         for (int j = 0; j < personCount; j++) {
             if (strcmp(name[i], personList[j].name) == 0) {
                 changeLocation(&personList[j], location);
+                personExists = true;
             }
         }
         if (!personExists) {
@@ -261,12 +262,29 @@ void conditionWordIndex(char *tokens[], int *conditionIndex, int numTokens) {
     }
 }
 
+bool checkAtCondition(char *people[], int numPeople, char *location) {
+    for (int i = 0; i < numPeople; i++) {
+        for (int j = 0; j < personCount; j++) {
+            if (strcmp(people[i], personList[j].name) == 0) {
+                if (strcmp(personList[j].location.name, location) != 0) {
+                    return false;
+                }
+                else {
+                    continue;
+                }
+            }
+        }
+    }
+    return true;
+}
+
 // THIS FUNCTION IS NOT FINISHED
 bool isIfTrue(char *ifSentence) {
     char **conditions = malloc(sizeof(char *) * 1024);
     int conditionIndex = 0;
     char *condition = malloc(sizeof(char) * 1024);
     int conditionStart = 0;
+    int conditionNum = 0;
 
     char *tokens[100];
     int numTokens = 0;
@@ -287,17 +305,25 @@ bool isIfTrue(char *ifSentence) {
                 if (isConditionWord(tokens[i])) {
                     char *conditionWord = tokens[i];  
                     if (strcmp(conditionWord, "at") == 0) {
-                        i++; // location index
-                        for (int j = conditionStart; j <= i; j++) {
-                            strcat(condition, tokens[j]);
-                            strcat(condition, " ");
-                        }
+                        strcat(condition, tokens[i++]);
+                        strcat(condition, " ");
+                        strcat(condition, tokens[i++]);
+                        strcat(condition, " ");
+                        strcat(condition, "0");
+                        conditionNum++;
                     }
 
                     // ali buy 3 bread if burak has 3 ring
                     // if bora has more than 4 ring and burak has 2 efe 
                     else if (strcmp(conditionWord, "has") == 0) {
+                        char word[10] = "1";
                         if (strcmp(tokens[i + 1], "more") == 0 || strcmp(tokens[i + 1], "less") == 0) {
+                            if(strcmp(tokens[i+1], "more") == 0){
+                                strcpy(word, "2");
+                            }
+                            else{
+                                strcpy(word, "3");
+                            }    
                             strcat(condition, tokens[i++]);
                             strcat(condition, " ");
                             strcat(condition, tokens[i++]);
@@ -310,6 +336,8 @@ bool isIfTrue(char *ifSentence) {
                             strcat(condition, " ");
                             i++;
                         }
+                        strcat(condition, word);
+                        conditionNum++;
                     }
                     conditions[conditionIndex++] = strdup(condition);
                     conditionStart = i + 1;
@@ -326,9 +354,61 @@ bool isIfTrue(char *ifSentence) {
 
         i++;
     }
+
     printf("Conditions: \n");
     for (int i = 0; i < conditionIndex; i++) {
         printf("Condition #%d: %s\n", i + 1, conditions[i]);
+    }
+
+    for (int i = 0; i < conditionNum; i++) {
+        char *condition = malloc(sizeof(char) * 1024);
+        condition = conditions[i];
+
+        char conditionType = condition[strlen(condition) - 1]; 
+
+        condition[strlen(condition)] = '\0';
+        condition[strlen(condition) - 1] = '\0';
+
+        int conditionWordIndex = 0;
+
+        char *tokens[100];
+        int numTokens = 0;
+        char *token = strtok(condition, " ");
+
+        while (token != NULL) {
+            if (isConditionWord(token)) {
+                conditionWordIndex = numTokens;
+                printf("%d \n", conditionWordIndex);
+            }
+            tokens[numTokens] = token;
+            numTokens++;
+            token = strtok(NULL, " ");
+        }
+
+        char **people = malloc(sizeof(char *) * 1024);
+        char *location = malloc(sizeof(char) * 1024);
+        int numPeople = 0;
+
+        for (int j = 0; j < conditionWordIndex; j++) {
+            if (strcmp(tokens[j], "and") != 0) {
+                printf("token: %s\n", tokens[j]);
+                people[numPeople] = tokens[j];
+                numPeople++;
+            }
+        }
+
+        if (conditionType == '0') {
+            int conditionIndex = 0;
+            
+            strcpy(location, tokens[conditionWordIndex + 1]);
+            if (!checkAtCondition(people, numPeople, location)) {
+                printf("not there\n");
+            }
+            else {
+                printf("there\n");
+            }
+        }
+        free(people);
     }
     
     return true;
@@ -575,7 +655,7 @@ bool itemsExistPersonList(char *names[], char *items[], int quantities[], int nu
 
 void applySentence(char *sentence) {
     // find the index of action word
-    printf("sentence in applySentence: %s\n", sentence);
+    // printf("sentence in applySentence: %s\n", sentence);
     int actionIndex = 0;
     int start = 0;
     int nextStart = 0;
@@ -698,7 +778,7 @@ void applySentence(char *sentence) {
         go(subjects, location, subjIndex);
     }
 
-    printf("sentence after applySentence: %s\n", sentence);
+    // printf("sentence after applySentence: %s\n", sentence);
 }
 
 void printPersonList() {
@@ -719,7 +799,7 @@ void semanticAnalysis(char **sentences) {
         char *sentence = malloc(sizeof(char) * 1025);
         sentence = sentences[i];
 
-        printf("sentence: %s\n", sentence);
+        // printf("sentence: %s\n", sentence);
 
         // hold the first and second letter of the sentence
         char *firstTwoLetters = malloc(sizeof(char) * 2);
@@ -735,14 +815,14 @@ void semanticAnalysis(char **sentences) {
 
         // find out why the sentence changes. here and also in the applySentence function
         if (ifIndex != sentenceIndex) {
-            printf("if sentence: %s\n", sentences[ifIndex]);
+            // printf("if sentence: %s\n", sentences[ifIndex]);
             if (strlen(sentences[ifIndex]) != 2 && isIfTrue(sentences[ifIndex])) {
                 for (int j = sentenceIndex; j < ifIndex; j++) {
                     applySentence(sentences[j]);
                 }
                 sentenceIndex = ifIndex + 1;
             }
-            printf("if sentence after: %s\n", sentences[ifIndex]);
+            // printf("if sentence after: %s\n", sentences[ifIndex]);
         }
 
         if (isIfFound) {

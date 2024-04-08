@@ -24,10 +24,12 @@ int main() {
 
     char **parsedTokens = parsing(tokens, numTokens);
 
-
+    /*
     for (int i = 0; parsedTokens[i] != NULL; i++) {
         printf("%s\n", parsedTokens[i]);
     }
+    */
+
     semanticAnalysis(parsedTokens);
 
     return 0;
