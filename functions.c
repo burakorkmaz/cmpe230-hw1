@@ -625,6 +625,69 @@ void indexOfTo(char **tokens, int *toIndex, int numTokens) {
     }
 }
 
+int getTotalItem(char *names[], int numPeople, char *item){
+    int total = 0;
+    for(int i = 0 ; i < numPeople;i++ ){
+        for(int j = 0; j < personCount ; j++){
+            if(strcmp(names[i], personList[j].name) == 0){
+                for(int k = 0; k < personList[j].numItems ; k++){
+                    if(strcmp(item, personList[j].items[k].name) == 0){
+                        total += personList[j].items[k].quantity;
+                    }
+                }
+            }
+        }
+    }
+    return total;
+}
+
+char *whereIsTheSubject(char *name){
+    for(int i = 0; i < personCount ; i++){
+        if(strcmp(personList[i].name, name) == 0){
+            return personList[i].location.name;
+        }
+    }
+    return "NOWHERE";
+}
+
+char *whoAtLocation(char *location){
+    char* sentence = malloc(sizeof(char) * 3000);
+    for(int i = 0; i < personCount ; i++){
+        if(strcmp(personList[i].location.name, location) == 0){
+            strcat(sentence, personList[i].name);
+            strcat(sentence, " and ");
+        }
+    }
+    if(strlen(sentence) == 0){
+        return "NOBODY";
+    }else{
+        sentence[strlen(sentence) - 5] = '\0';
+        return sentence;
+    }
+}
+
+char *totalInventory(char *name){
+    char* sentence = malloc(sizeof(char) * 3000);
+    for(int i = 0; i < personCount ; i++){
+        if(strcmp(personList[i].name, name) == 0){
+            if(personList[i].numItems == 0){
+                return "NOTHING";
+            }
+            for(int j = 0; j < personList[i].numItems;j++){
+                char buffer[20];
+                sprintf(buffer , "%d",personList[i].items[j].quantity);
+                strcat(sentence, buffer);
+                strcat(sentence, " ");
+                strcat(sentence, personList[i].items[j].name);
+                strcat(sentence, " and ");
+            }
+        }
+    }
+    sentence[strlen(sentence) - 5] = '\0';
+    return sentence;
+}
+
+
 bool itemsExistPersonList(char *names[], char *items[], int quantities[], int numNames, int numItems) {
     for (int i = 0; i < numNames; i++) {
         for (int j = 0; j < personCount; j++) {
