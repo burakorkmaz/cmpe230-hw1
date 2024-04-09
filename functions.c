@@ -280,6 +280,27 @@ bool checkAtCondition(char *people[], int numPeople, char *location) {
 }
 
 bool checkHasCondition(char *people[], int numPeople, char *items[], int quantity[], int numItems) {
+    for (int i = 0; i < numPeople; i++) {
+        for (int j = 0; j < personCount; j++) {
+            if (strcmp(people[i], personList[j].name) == 0) {
+                for (int k = 0; k < numItems; k++) {
+                    bool itemExists = false;
+                    for (int l = 0; l < personList[j].numItems; l++) {
+                        if (strcmp(items[k], personList[j].items[l].name) == 0) {
+                            if (personList[j].items[l].quantity >= quantity[k]) {
+                                itemExists = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!itemExists) {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    return true;
 }
 
 // THIS FUNCTION IS NOT FINISHED
@@ -440,6 +461,7 @@ bool isIfTrue(char *ifSentence) {
                 }
             }
             if (checkHasCondition(people, numPeople, items, quantity, numItems)) {
+                printf("the person has the items\n");
             }
             else {
                 return false;
