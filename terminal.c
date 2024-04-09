@@ -3,8 +3,10 @@
 
 void readTerminal(char *buffer, int size) {
     printf(">> ");
-    scanf("%[^\n]", buffer);
-    // fgets(buffer, size, stdin);
+    // scanf("%[^\n]", buffer);
+    fgets(buffer, size, stdin);
+    int len = strlen(buffer);
+    buffer[len - 1] = '\0';
 }
 
 void tokenize(char *buffer, char *delim, char **tokens, int *numTokens) {

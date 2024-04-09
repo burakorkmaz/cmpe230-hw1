@@ -1,4 +1,7 @@
+#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 void readTerminal(char *buffer, int size);
 void tokenize(char *buffer, char *delim, char **tokens, int *numTokens);
@@ -12,25 +15,28 @@ int actionIndex = 0;
 int nextStart = 0;
 
 int main() {
-    char buffer[1025];
-    readTerminal(buffer, 1025);
 
+    while (1) {
+        char buffer[1025];
+        readTerminal(buffer, 1025);
 
-    // print the tokenized buffer
-    char *tokens[100];
-    int numTokens;
-    tokenize(buffer, " ", tokens, &numTokens);
+        char *tokens[100];
+        int numTokens;
+        tokenize(buffer, " ", tokens, &numTokens);
 
+        char **parsedTokens = parsing(tokens, numTokens);
 
-    char **parsedTokens = parsing(tokens, numTokens);
-
-    /*
-    for (int i = 0; parsedTokens[i] != NULL; i++) {
-        printf("%s\n", parsedTokens[i]);
+        // check if the first token is "exit"
+        if (numTokens == 1 && strcmp(parsedTokens[0], "exit") == 0) {
+            // free memory before exiting
+            for (int i = 0; parsedTokens[i] != NULL; i++) {
+                free(parsedTokens[i]);
+            }
+            free(parsedTokens);
+            break; 
+        }
+        semanticAnalysis(parsedTokens);
     }
-    */
-
-    semanticAnalysis(parsedTokens);
 
     return 0;
 }

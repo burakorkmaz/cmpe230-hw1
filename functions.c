@@ -264,6 +264,7 @@ void conditionWordIndex(char *tokens[], int *conditionIndex, int numTokens) {
 
 bool checkAtCondition(char *people[], int numPeople, char *location) {
     for (int i = 0; i < numPeople; i++) {
+        printf("personCount: %d\n", personCount);
         for (int j = 0; j < personCount; j++) {
             if (strcmp(people[i], personList[j].name) == 0) {
                 if (strcmp(personList[j].location.name, location) != 0) {
@@ -355,10 +356,12 @@ bool isIfTrue(char *ifSentence) {
         i++;
     }
 
+    /*
     printf("Conditions: \n");
     for (int i = 0; i < conditionIndex; i++) {
         printf("Condition #%d: %s\n", i + 1, conditions[i]);
     }
+    */
 
     for (int i = 0; i < conditionNum; i++) {
         char *condition = malloc(sizeof(char) * 1024);
@@ -378,7 +381,6 @@ bool isIfTrue(char *ifSentence) {
         while (token != NULL) {
             if (isConditionWord(token)) {
                 conditionWordIndex = numTokens;
-                printf("%d \n", conditionWordIndex);
             }
             tokens[numTokens] = token;
             numTokens++;
@@ -391,7 +393,6 @@ bool isIfTrue(char *ifSentence) {
 
         for (int j = 0; j < conditionWordIndex; j++) {
             if (strcmp(tokens[j], "and") != 0) {
-                printf("token: %s\n", tokens[j]);
                 people[numPeople] = tokens[j];
                 numPeople++;
             }
@@ -401,11 +402,12 @@ bool isIfTrue(char *ifSentence) {
             int conditionIndex = 0;
             
             strcpy(location, tokens[conditionWordIndex + 1]);
-            if (!checkAtCondition(people, numPeople, location)) {
-                printf("not there\n");
+
+            if (checkAtCondition(people, numPeople, location)) {
+                printf("person is there\n");
             }
             else {
-                printf("there\n");
+                return false;
             }
         }
         free(people);
