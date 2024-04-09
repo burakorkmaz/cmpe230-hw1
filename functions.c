@@ -150,10 +150,6 @@ void buy(char *name[], char *items[], int quantity[], int numItems, int numSubje
 void sell(char *name[], char *items[], int quantity[], int numItems, int numSubjects) {
     for (int i = 0; i < numSubjects; i++) {
         bool personExists = false;
-        if (personCount == 0) {
-            createPerson(&personList[personCount], name[i]);
-            personExists = true;
-        }
         for (int j = 0; j < personCount; j++) {
             if (strcmp(name[i], personList[j].name) == 0) {
                 personExists = true;
@@ -173,12 +169,11 @@ void sell(char *name[], char *items[], int quantity[], int numItems, int numSubj
                             break;
                         }
                     }
-                    if (!itemExists) {
-                        printf("OK\n");
-                        return;
-                    }
                 }
             }
+        }
+        if(!personExists){
+            createPerson(&personList[personCount], name[i]);
         }
         printf("OK\n");
     }
@@ -864,12 +859,8 @@ void indexOfTo(char **tokens, int *toIndex, int numTokens) {
 
 
 bool itemsExistPersonList(char *names[], char *items[], int quantities[], int numNames, int numItems) {
-    printf("%d\n", numNames);
-    printf("%d\n", numItems);
-    printf("%s\n", names[0]);
-    bool personExist = false;
-
     for (int i = 0; i < numNames; i++) {
+        bool personExist = false;
         for (int j = 0; j < personCount; j++) {
             if (strcmp(names[i], personList[j].name) == 0) {
                 personExist = true;
@@ -889,9 +880,9 @@ bool itemsExistPersonList(char *names[], char *items[], int quantities[], int nu
                     }
                 }
             }
-            if(!personExist){
-                createPerson(&personList[personCount], names[i]);
-            }
+        }
+        if(!personExist){
+            createPerson(&personList[personCount], names[i]);
         }
     }
     if (personCount == 0) {
