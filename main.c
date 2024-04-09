@@ -25,6 +25,10 @@ int main() {
         tokenize(buffer, " ", tokens, &numTokens);
 
         char **parsedTokens = parsing(tokens, numTokens);
+        
+        for (int i = 0; parsedTokens[i] != NULL; i++) {
+            printf("%s\n", parsedTokens[i]);
+        }
 
         // check if the first token is "exit"
         if (numTokens == 1 && strcmp(parsedTokens[0], "exit") == 0) {

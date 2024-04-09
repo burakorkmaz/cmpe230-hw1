@@ -279,6 +279,9 @@ bool checkAtCondition(char *people[], int numPeople, char *location) {
     return true;
 }
 
+bool checkHasCondition(char *people[], int numPeople, char *items[], int quantity[], int numItems) {
+}
+
 // THIS FUNCTION IS NOT FINISHED
 bool isIfTrue(char *ifSentence) {
     char **conditions = malloc(sizeof(char *) * 1024);
@@ -317,14 +320,16 @@ bool isIfTrue(char *ifSentence) {
                     // ali buy 3 bread if burak has 3 ring
                     // if bora has more than 4 ring and burak has 2 efe 
                     else if (strcmp(conditionWord, "has") == 0) {
-                        char word[10] = "1";
+                        char code[10] = "1"; // this variable is a code to detect the type of the if condition
+                                             // set to 1 by default which states that it is "has" condition
                         if (strcmp(tokens[i + 1], "more") == 0 || strcmp(tokens[i + 1], "less") == 0) {
-                            if(strcmp(tokens[i+1], "more") == 0){
-                                strcpy(word, "2");
+                            if(strcmp(tokens[i + 1], "more") == 0) {
+                                strcpy(code, "2");
                             }
-                            else{
-                                strcpy(word, "3");
+                            else {
+                                strcpy(code, "3");
                             }    
+
                             strcat(condition, tokens[i++]);
                             strcat(condition, " ");
                             strcat(condition, tokens[i++]);
@@ -337,7 +342,7 @@ bool isIfTrue(char *ifSentence) {
                             strcat(condition, " ");
                             i++;
                         }
-                        strcat(condition, word);
+                        strcat(condition, code);
                         conditionNum++;
                     }
                     conditions[conditionIndex++] = strdup(condition);
@@ -369,6 +374,10 @@ bool isIfTrue(char *ifSentence) {
 
         char conditionType = condition[strlen(condition) - 1]; 
 
+        /* 
+         * removing the last character of the condition to get the 
+         * actual condition without the condition type code 
+         */
         condition[strlen(condition)] = '\0';
         condition[strlen(condition) - 1] = '\0';
 
@@ -387,8 +396,10 @@ bool isIfTrue(char *ifSentence) {
             token = strtok(NULL, " ");
         }
 
+        // if ali has 3 bread and 5 ring and burak at mordor
+        // if ali has more than 3 bread
+        // if burak and ali hass less than 3 bread
         char **people = malloc(sizeof(char *) * 1024);
-        char *location = malloc(sizeof(char) * 1024);
         int numPeople = 0;
 
         for (int j = 0; j < conditionWordIndex; j++) {
@@ -398,7 +409,9 @@ bool isIfTrue(char *ifSentence) {
             }
         }
 
+        // if ali at mordor
         if (conditionType == '0') {
+            char *location = malloc(sizeof(char) * 1024);
             int conditionIndex = 0;
             
             strcpy(location, tokens[conditionWordIndex + 1]);
@@ -409,6 +422,34 @@ bool isIfTrue(char *ifSentence) {
             else {
                 return false;
             }
+        }
+        // if ali has 3 bread and 5 water
+        else if (conditionType == '1') {
+            char *items[1024];
+            int numItems = 0;
+            int quantity[1024]; 
+            for (int j = conditionWordIndex + 1; j < numTokens; j++) {
+                if (strcmp(tokens[j], "and") != 0) {
+                    if (!isNumeric(tokens[j])) {
+                        items[numItems] = tokens[j];
+                        numItems++;
+                    }
+                    else {
+                        quantity[numItems] = atoi(tokens[j]);
+                    }
+                }
+            }
+            if (checkHasCondition(people, numPeople, items, quantity, numItems)) {
+            }
+            else {
+                return false;
+            }
+        }
+        else if (conditionType == '2') {
+            printf("more condition\n");
+        }
+        else if (conditionType == '3') {
+            printf("less condition\n");
         }
         free(people);
     }
