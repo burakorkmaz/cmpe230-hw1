@@ -10,17 +10,17 @@ void findAction(char *tokens[], int *start, int *nextStart, int *actionIndex, in
 char **parsing(char *tokens[], int numTokens);
 void semanticAnalysis(char **sentences);
 
-char *keywords[] = {
-    "NOBODY",
-    "NOTHING",
-    "NOWHERE"
-};
 
 int start = 0;
 int actionIndex = 0;
 int nextStart = 0;
 
 int main() {
+    char *keywords[] = {
+        "NOBODY",
+        "NOTHING",
+        "NOWHERE"
+    };
 
     while (1) {
         bool doesContainKeyword = false;
