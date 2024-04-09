@@ -352,7 +352,6 @@ bool checkHasLessCondition(char *people[], int numPeople, char *items[], int qua
     return true;
 }
 
-// THIS FUNCTION IS NOT FINISHED
 bool isIfTrue(char *ifSentence) {
     char **conditions = malloc(sizeof(char *) * 1024);
     int conditionIndex = 0;
@@ -373,7 +372,6 @@ bool isIfTrue(char *ifSentence) {
 
     int i = 0;
 
-    // if ali has 3 bread and 5 ring and burak at mordor
     while (i < numTokens) {
         if (strcmp(tokens[i], "if") != 0) {
             if (isConditionWord(tokens[i])) {
@@ -387,11 +385,9 @@ bool isIfTrue(char *ifSentence) {
                     conditionNum++;
                 }
 
-                    // ali buy 3 bread if burak has 3 ring
-                    // if bora has more than 4 ring and burak has 2 efe
                 else if (strcmp(conditionWord, "has") == 0) {
                     char code[10] = "1"; // this variable is a code to detect the type of the if condition
-                    // set to 1 by default which states that it is "has" condition
+                                        // set to 1 by default which states that it is "has" condition
                     if (strcmp(tokens[i + 1], "more") == 0 || strcmp(tokens[i + 1], "less") == 0) {
                         if(strcmp(tokens[i + 1], "more") == 0) {
                             strcpy(code, "2");
@@ -466,9 +462,6 @@ bool isIfTrue(char *ifSentence) {
             token = strtok(NULL, " ");
         }
 
-        // if ali has 3 bread and 5 ring and burak at mordor
-        // if ali has more than 3 bread
-        // if burak and ali hass less than 3 bread
         char **people = malloc(sizeof(char *) * 1024);
         int numPeople = 0;
 
@@ -479,7 +472,6 @@ bool isIfTrue(char *ifSentence) {
             }
         }
 
-        // if ali at mordor
         if (conditionType == '0') {
             char *location = malloc(sizeof(char) * 1024);
             int conditionIndex = 0;
@@ -493,7 +485,6 @@ bool isIfTrue(char *ifSentence) {
                 return false;
             }
         }
-            // if ali has 3 bread and 5 water
         else if (conditionType == '1') {
             char *items[1024];
             int numItems = 0;
@@ -516,7 +507,6 @@ bool isIfTrue(char *ifSentence) {
                 return false;
             }
         }
-        // if ali has more than 3 bread and 5 water
         else if (conditionType == '2') {
             char *items[1024];
             int numItems = 0;
@@ -673,7 +663,8 @@ char **parsing(char *tokens[], int numTokens) {
         else if(strcmp(tokens[numTokens -2], "total") == 0){
             printf("%s\n", totalInventory(tokens[0]));
         }
-    }else {
+    }
+    else {
         while (tokenIndex < numTokens) {
             strcat(sentence, tokens[tokenIndex]);
             strcat(sentence, " ");
@@ -700,7 +691,8 @@ char **parsing(char *tokens[], int numTokens) {
 
                 sentences[sentenceIndex++] = strdup(sentence);
                 sentence[0] = '\0';
-            } else if (strcmp(tokens[tokenIndex], "go") == 0) {
+            } 
+            else if (strcmp(tokens[tokenIndex], "go") == 0) {
                 tokenIndex++;
 
                 if (strcmp(tokens[tokenIndex], "to") != 0) {
@@ -726,7 +718,6 @@ char **parsing(char *tokens[], int numTokens) {
                 sentence[0] = '\0';
             }
 
-                // if ali has 3 bread
             else if (strcmp(tokens[tokenIndex], "if") == 0) {
                 bool conditionFound = false;
                 bool actionFound = false;
@@ -902,8 +893,6 @@ bool itemsExistPersonList(char *names[], char *items[], int quantities[], int nu
 }
 
 void applySentence(char *sentence) {
-    // find the index of action word
-    // printf("sentence in applySentence: %s\n", sentence);
     int actionIndex = 0;
     int start = 0;
     int nextStart = 0;
