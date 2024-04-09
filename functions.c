@@ -287,7 +287,55 @@ bool checkHasCondition(char *people[], int numPeople, char *items[], int quantit
                     bool itemExists = false;
                     for (int l = 0; l < personList[j].numItems; l++) {
                         if (strcmp(items[k], personList[j].items[l].name) == 0) {
-                            if (personList[j].items[l].quantity >= quantity[k]) {
+                            if (personList[j].items[l].quantity == quantity[k]) {
+                                itemExists = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!itemExists) {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+
+bool checkHasMoreCondition(char *people[], int numPeople, char *items[], int quantity[], int numItems) {
+    for (int i = 0; i < numPeople; i++) {
+        for (int j = 0; j < personCount; j++) {
+            if (strcmp(people[i], personList[j].name) == 0) {
+                for (int k = 0; k < numItems; k++) {
+                    bool itemExists = false;
+                    for (int l = 0; l < personList[j].numItems; l++) {
+                        if (strcmp(items[k], personList[j].items[l].name) == 0) {
+                            if (personList[j].items[l].quantity > quantity[k]) {
+                                itemExists = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!itemExists) {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+
+bool checkHasLessCondition(char *people[], int numPeople, char *items[], int quantity[], int numItems) {
+    for (int i = 0; i < numPeople; i++) {
+        for (int j = 0; j < personCount; j++) {
+            if (strcmp(people[i], personList[j].name) == 0) {
+                for (int k = 0; k < numItems; k++) {
+                    bool itemExists = false;
+                    for (int l = 0; l < personList[j].numItems; l++) {
+                        if (strcmp(items[k], personList[j].items[l].name) == 0) {
+                            if (personList[j].items[l].quantity < quantity[k]) {
                                 itemExists = true;
                                 break;
                             }
@@ -467,11 +515,50 @@ bool isIfTrue(char *ifSentence) {
                 return false;
             }
         }
+        // if ali has more than 3 bread and 5 water
         else if (conditionType == '2') {
-            printf("more condition\n");
+            char *items[1024];
+            int numItems = 0;
+            int quantity[1024]; 
+            for (int j = conditionWordIndex + 3; j < numTokens; j++) {
+                if (strcmp(tokens[j], "and") != 0) {
+                    if (!isNumeric(tokens[j])) {
+                        items[numItems] = tokens[j];
+                        numItems++;
+                    }
+                    else {
+                        quantity[numItems] = atoi(tokens[j]);
+                    }
+                }
+            }
+            if (checkHasMoreCondition(people, numPeople, items, quantity, numItems)) {
+                printf("the person has more\n");
+            }
+            else {
+                return false;
+            }
         }
         else if (conditionType == '3') {
-            printf("less condition\n");
+            char *items[1024];
+            int numItems = 0;
+            int quantity[1024]; 
+            for (int j = conditionWordIndex + 3; j < numTokens; j++) {
+                if (strcmp(tokens[j], "and") != 0) {
+                    if (!isNumeric(tokens[j])) {
+                        items[numItems] = tokens[j];
+                        numItems++;
+                    }
+                    else {
+                        quantity[numItems] = atoi(tokens[j]);
+                    }
+                }
+            }
+            if (checkHasLessCondition(people, numPeople, items, quantity, numItems)) {
+                printf("the person has less\n");
+            }
+            else {
+                return false;
+            }
         }
         free(people);
     }
