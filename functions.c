@@ -495,7 +495,23 @@ char **parsing(char *tokens[], int numTokens) {
 
     if(strcmp(tokens[numTokens -1], "?") == 0){
         if(strcmp(tokens[numTokens -3], "total") == 0){
-        printf("1\n");
+            if(numTokens == 4){
+                char **names = malloc(sizeof(char * ) * 1024);
+                names[0] = tokens[0];
+                printf("%d\n", getTotalItem(names ,1,tokens[numTokens -2]));
+            }else{
+                int i = 0;
+                char **names = malloc(sizeof(char * ) * 1024);
+                int numPeople = 0;
+                while(strcmp(tokens[i], "total") != 0){
+                    if(strcmp(tokens[i], "and") != 0){
+                        names[numPeople] = tokens[i];
+                        numPeople++;
+                    }
+                    i++;
+                }
+                printf("%d\n", getTotalItem(names ,numPeople,tokens[numTokens -2]));
+            }
         }
         else if (strcmp(tokens[numTokens -2], "where") == 0){
             printf("%s\n", whereIsTheSubject(tokens[0]));
@@ -506,8 +522,6 @@ char **parsing(char *tokens[], int numTokens) {
         else if(strcmp(tokens[numTokens -2], "total") == 0){
             printf("%s\n", totalInventory(tokens[0]));
         }
-
-        printf("ASDSA\n");
     }else {
         while (tokenIndex < numTokens) {
             strcat(sentence, tokens[tokenIndex]);
