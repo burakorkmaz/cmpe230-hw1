@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 int personCount = 0;
+bool isQuestion = false;
 
 char *keywords[] = {
         "buy",
@@ -162,7 +163,6 @@ void sell(char *name[], char *items[], int quantity[], int numItems, int numSubj
                                 personList[j].items[k].quantity -= quantity[l];
                             }
                             else {
-                                printf("OK\n");
                                 return;
                             }
                             itemExists = true;
@@ -175,7 +175,6 @@ void sell(char *name[], char *items[], int quantity[], int numItems, int numSubj
         if(!personExists){
             createPerson(&personList[personCount], name[i]);
         }
-        printf("OK\n");
     }
 }
 
@@ -193,7 +192,6 @@ void go(char *name[], char *location, int numSubjects) {
             changeLocation(&personList[personCount - 1], location);
         }
     }
-    printf("OK\n");
 }
 
 // Function to check if a string is numerical
@@ -637,6 +635,7 @@ char **parsing(char *tokens[], int numTokens) {
     }
 
     if(strcmp(tokens[numTokens -1], "?") == 0){
+        isQuestion = true;
         if(strcmp(tokens[numTokens -3], "total") == 0){
             if(numTokens == 4){
                 char **names = malloc(sizeof(char * ) * 1024);
@@ -966,7 +965,6 @@ void applySentence(char *sentence) {
             }
 
             if (!itemsExistPersonList(sellerName, items, quantities, 1, itemIndex)) {
-                printf("OK\n");
                 return;
             }
             else {
@@ -1014,7 +1012,6 @@ void applySentence(char *sentence) {
             }
 
             if (!itemsExistPersonList(subjects, items, quantities, subjIndex, itemIndex)) {
-                printf("OK\n");
                 return;
             }
             else {
@@ -1064,16 +1061,14 @@ void semanticAnalysis(char **sentences) {
         }
         free(firstTwoLetters);
 
-        // find out why the sentence changes. here and also in the applySentence function
         if (ifIndex != sentenceIndex) {
-            // printf("if sentence: %s\n", sentences[ifIndex]);
             if (strlen(sentences[ifIndex]) != 2 && isIfTrue(sentences[ifIndex])) {
                 for (int j = sentenceIndex; j < ifIndex; j++) {
                     applySentence(sentences[j]);
                 }
                 sentenceIndex = ifIndex + 1;
             }
-            // printf("if sentence after: %s\n", sentences[ifIndex]);
+            printf("OK\n");
         }
 
         if (isIfFound) {
@@ -1099,6 +1094,12 @@ void semanticAnalysis(char **sentences) {
         while (sentences[x] != NULL) {
             applySentence(sentences[x]);
             x++;
+        }
+        if (!isQuestion) {
+            printf("OK\n");
+        }
+        else {
+            isQuestion = false;
         }
     }
     // printf("--------------------\n");
