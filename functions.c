@@ -260,7 +260,6 @@ void conditionWordIndex(char *tokens[], int *conditionIndex, int numTokens) {
 
 bool checkAtCondition(char *people[], int numPeople, char *location) {
     for (int i = 0; i < numPeople; i++) {
-        printf("personCount: %d\n", personCount);
         for (int j = 0; j < personCount; j++) {
             if (strcmp(people[i], personList[j].name) == 0) {
                 if (strcmp(personList[j].location.name, location) != 0) {
@@ -474,7 +473,7 @@ bool isIfTrue(char *ifSentence) {
             strcpy(location, tokens[conditionWordIndex + 1]);
 
             if (checkAtCondition(people, numPeople, location)) {
-                printf("person is there\n");
+                // printf("person is there\n");
             }
             else {
                 return false;
@@ -496,7 +495,7 @@ bool isIfTrue(char *ifSentence) {
                 }
             }
             if (checkHasCondition(people, numPeople, items, quantity, numItems)) {
-                printf("the person has the items\n");
+                // printf("the person has the items\n");
             }
             else {
                 return false;
@@ -518,7 +517,7 @@ bool isIfTrue(char *ifSentence) {
                 }
             }
             if (checkHasMoreCondition(people, numPeople, items, quantity, numItems)) {
-                printf("the person has more\n");
+                // printf("the person has more\n");
             }
             else {
                 return false;
@@ -540,7 +539,7 @@ bool isIfTrue(char *ifSentence) {
                 }
             }
             if (checkHasLessCondition(people, numPeople, items, quantity, numItems)) {
-                printf("the person has less\n");
+                // printf("the person has less\n");
             }
             else {
                 return false;
@@ -568,47 +567,55 @@ int getTotalItem(char *names[], int numPeople, char *item){
     return total;
 }
 
-char *whereIsTheSubject(char *name){
-    for(int i = 0; i < personCount ; i++){
-        if(strcmp(personList[i].name, name) == 0){
+char *whereIsTheSubject(char *name) {
+    for(int i = 0; i < personCount ; i++) {
+        if(strcmp(personList[i].name, name) == 0) {
             return personList[i].location.name;
         }
     }
     return "NOWHERE";
 }
 
-char *whoAtLocation(char *location){
-    char* sentence = malloc(sizeof(char) * 3000);
-    for(int i = 0; i < personCount ; i++){
-        if(strcmp(personList[i].location.name, location) == 0){
+char *whoAtLocation(char *location) {
+    char* sentence = malloc(sizeof(char) * 1025);
+    for(int i = 0; i < personCount ; i++) {
+        if(strcmp(personList[i].location.name, location) == 0) {
             strcat(sentence, personList[i].name);
             strcat(sentence, " and ");
         }
     }
-    if(strlen(sentence) == 0){
+    if(strlen(sentence) == 0) {
         return "NOBODY";
-    }else{
+    }
+    else {
         sentence[strlen(sentence) - 5] = '\0';
         return sentence;
     }
 }
 
 char *totalInventory(char *name){
-    char* sentence = malloc(sizeof(char) * 3000);
-    for(int i = 0; i < personCount ; i++){
-        if(strcmp(personList[i].name, name) == 0){
-            if(personList[i].numItems == 0){
+    char* sentence = malloc(sizeof(char) * 1025);
+    bool personExists = false;
+    for(int i = 0; i < personCount ; i++) {
+        if(strcmp(personList[i].name, name) == 0) {
+            personExists = true;
+            if(personList[i].numItems == 0) {
                 return "NOTHING";
             }
-            for(int j = 0; j < personList[i].numItems;j++){
+            for(int j = 0; j < personList[i].numItems;j++) {
                 char buffer[20];
-                sprintf(buffer , "%d",personList[i].items[j].quantity);
-                strcat(sentence, buffer);
-                strcat(sentence, " ");
-                strcat(sentence, personList[i].items[j].name);
-                strcat(sentence, " and ");
+                if (personList[i].items[j].quantity != 0) {
+                    sprintf(buffer , "%d",personList[i].items[j].quantity);
+                    strcat(sentence, buffer);
+                    strcat(sentence, " ");
+                    strcat(sentence, personList[i].items[j].name);
+                    strcat(sentence, " and ");
+                }
             }
         }
+    }
+    if(!personExists) {
+        return "NOTHING";
     }
     sentence[strlen(sentence) - 5] = '\0';
     return sentence;
@@ -649,13 +656,17 @@ char **parsing(char *tokens[], int numTokens) {
                 printf("%d\n", getTotalItem(names ,numPeople,tokens[numTokens -2]));
             }
         }
-        else if (strcmp(tokens[numTokens -2], "where") == 0){
+        else if (strcmp(tokens[numTokens -2], "where") == 0) {
+            // printf("being written in where case\n");
             printf("%s\n", whereIsTheSubject(tokens[0]));
         }
-        else if (strcmp(tokens[0], "who") == 0 && strcmp(tokens[1], "at") == 0){
+        else if (strcmp(tokens[0], "who") == 0 && strcmp(tokens[1], "at") == 0) {
+            // printf("being written in who at case\n");
             printf("%s\n", whoAtLocation(tokens[2]));
+            // printf("being written is done\n");
         }
-        else if(strcmp(tokens[numTokens -2], "total") == 0){
+        else if(strcmp(tokens[numTokens -2], "total") == 0) {
+            // printf("being written in total case\n");
             printf("%s\n", totalInventory(tokens[0]));
         }
     }
@@ -874,6 +885,7 @@ bool itemsExistPersonList(char *names[], char *items[], int quantities[], int nu
         }
         if(!personExist){
             createPerson(&personList[personCount], names[i]);
+            return false;
         }
     }
     if (personCount == 0) {
@@ -1089,6 +1101,6 @@ void semanticAnalysis(char **sentences) {
             x++;
         }
     }
-    printf("--------------------\n");
-    printPersonList();
+    // printf("--------------------\n");
+    // printPersonList();
 }
