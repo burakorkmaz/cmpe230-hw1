@@ -659,16 +659,12 @@ char **parsing(char *tokens[], int numTokens) {
             }
         }
         else if (strcmp(tokens[numTokens -2], "where") == 0) {
-            // printf("being written in where case\n");
             printf("%s\n", whereIsTheSubject(tokens[0]));
         }
         else if (strcmp(tokens[0], "who") == 0 && strcmp(tokens[1], "at") == 0) {
-            // printf("being written in who at case\n");
             printf("%s\n", whoAtLocation(tokens[2]));
-            // printf("being written is done\n");
         }
         else if(strcmp(tokens[numTokens -2], "total") == 0) {
-            // printf("being written in total case\n");
             printf("%s\n", totalInventory(tokens[0]));
         }
     }
