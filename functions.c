@@ -615,6 +615,9 @@ char *totalInventory(char *name){
     if(!personExists) {
         return "NOTHING";
     }
+    if (strlen(sentence) == 0) {
+        return "NOTHING";
+    }
     sentence[strlen(sentence) - 5] = '\0';
     return sentence;
 }
@@ -902,6 +905,7 @@ void applySentence(char *sentence) {
 
     char *tokens[250];
     char *subjects[250];
+    int subjNum = 0;
     int subjIndex = 0;
     char *items[250];
     int itemIndex = 0;
@@ -923,6 +927,7 @@ void applySentence(char *sentence) {
     for(int i = 0; i < actionIndex ; i++){
         if(strcmp(tokens[i], "and") != 0) {
             subjects[subjIndex++] = tokens[i];
+            subjNum++;
         }
     }
 
@@ -964,12 +969,18 @@ void applySentence(char *sentence) {
                 }
             }
 
-            if (!itemsExistPersonList(sellerName, items, quantities, 1, itemIndex)) {
+            // multiply quantities with the number of subjects and create another array
+            int newQuantities[250];
+            for(int i = 0; i < itemIndex; i++){
+                newQuantities[i] = quantities[i] * subjIndex;
+            }
+
+            if (!itemsExistPersonList(sellerName, items, newQuantities, 1, itemIndex)) {
                 return;
             }
             else {
                 buy(subjects, items, quantities, itemIndex, subjIndex);
-                sell(sellerName, items, quantities, itemIndex, 1);
+                sell(sellerName, items, newQuantities, itemIndex, 1);
             }
         }
     }
@@ -986,7 +997,13 @@ void applySentence(char *sentence) {
                     }
                 }
             }
-            sell(subjects, items, quantities, itemIndex, subjIndex);
+
+            if (!itemsExistPersonList(subjects, items, quantities, subjIndex, itemIndex)) {
+                return;
+            }
+            else {
+                sell(subjects, items, quantities, itemIndex, subjIndex);
+            }
         }
 
         else {
@@ -1011,12 +1028,18 @@ void applySentence(char *sentence) {
                 createPerson(&personList[personCount], buyerName[0]);
             }
 
+            // multiply quantities with the number of subjects and create another array
+            int newQuantities[250];
+            for(int i = 0; i < itemIndex; i++){
+                newQuantities[i] = quantities[i] * subjIndex;
+            }
+
             if (!itemsExistPersonList(subjects, items, quantities, subjIndex, itemIndex)) {
                 return;
             }
             else {
                 sell(subjects, items, quantities, itemIndex, subjIndex);
-                buy(buyerName, items, quantities, itemIndex, 1);
+                buy(buyerName, items, newQuantities, itemIndex, 1);
             }
         }
     }
