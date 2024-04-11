@@ -9,7 +9,7 @@ void findKeyword(char *token);
 void findAction(char *tokens[], int *start, int *nextStart, int *actionIndex, int numTokens);
 char **parsing(char *tokens[], int numTokens);
 void semanticAnalysis(char **sentences);
-
+bool checkSyntax(char *sentence);
 
 int start = 0;
 int actionIndex = 0;
@@ -33,11 +33,14 @@ int main() {
 
         char **parsedTokens = parsing(tokens, numTokens);
 
-        /*
+        bool syntaticallyTrue = true;
         for (int i = 0; parsedTokens[i] != NULL; i++) {
-            printf("%s\n", parsedTokens[i]);
+            //printf("%s\n", parsedTokens[i]);
+            if(!checkSyntax(parsedTokens[i])){
+                syntaticallyTrue = false;
+                break;
+            }
         }
-        */
 
         for (int i = 0; i < numTokens; i++) {
             for (int j = 0; j < 3; j++) {
@@ -52,17 +55,21 @@ int main() {
             printf("INVALID\n");
             continue;
         }
-        // check if the first token is "exit"
-        if (numTokens == 1 && strcmp(parsedTokens[0], "exit") == 0) {
-            // free memory before exiting
-            for (int i = 0; parsedTokens[i] != NULL; i++) {
-                free(parsedTokens[i]);
+        if(syntaticallyTrue) {
+            // check if the first token is "exit"
+            if (numTokens == 1 && strcmp(parsedTokens[0], "exit") == 0) {
+                // free memory before exiting
+                for (int i = 0; parsedTokens[i] != NULL; i++) {
+                    free(parsedTokens[i]);
+                }
+                free(parsedTokens);
+                break;
             }
-            free(parsedTokens);
-            break; 
+            semanticAnalysis(parsedTokens);
         }
-        semanticAnalysis(parsedTokens);
+        else{
+            printf("INVALID\n");
+        }
     }
-
     return 0;
 }
