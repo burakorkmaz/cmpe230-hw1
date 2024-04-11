@@ -702,7 +702,7 @@ char **parsing(char *tokens[], int numTokens) {
                 tokenIndex++;
 
                 if (strcmp(tokens[tokenIndex], "to") != 0) {
-                    printf("INVALID2\n");
+                    printf("INVALID\n");
                     isInvalid = true;
                     break;
                 }
@@ -765,7 +765,7 @@ char **parsing(char *tokens[], int numTokens) {
                             tokenIndex++;
 
                             if (isNumeric(tokens[tokenIndex])) {
-                                printf("INVALID3\n");
+                                printf("INVALID\n");
                                 isInvalid = true;
                                 break;
                             } else {
