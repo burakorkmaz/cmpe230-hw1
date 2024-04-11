@@ -5,6 +5,7 @@
 
 int personCount = 0;
 bool isQuestion = false;
+bool isInvalid = false;
 
 char *keywords[] = {
         "buy",
@@ -681,6 +682,7 @@ char **parsing(char *tokens[], int numTokens) {
                 tokenIndex++;
                 if (!isNumeric(tokens[tokenIndex])) {
                     printf("INVALID\n");
+                    isInvalid = true;
                     break;
                 }
 
@@ -704,7 +706,8 @@ char **parsing(char *tokens[], int numTokens) {
                 tokenIndex++;
 
                 if (strcmp(tokens[tokenIndex], "to") != 0) {
-                    printf("INVALID\n");
+                    printf("INVALID2\n");
+                    isInvalid = true;
                     break;
                 }
 
@@ -766,7 +769,8 @@ char **parsing(char *tokens[], int numTokens) {
                             tokenIndex++;
 
                             if (isNumeric(tokens[tokenIndex])) {
-                                printf("INVALID\n");
+                                printf("INVALID3\n");
+                                isInvalid = true;
                                 break;
                             } else {
                                 lastAndIndex = tokenIndex + 1;
@@ -777,11 +781,13 @@ char **parsing(char *tokens[], int numTokens) {
                             if (strcmp(tokens[tokenIndex], "less") == 0 || strcmp(tokens[tokenIndex], "more") == 0) {
                                 tokenIndex++;
                                 if (strcmp(tokens[tokenIndex], "than") != 0) {
-                                    printf("INVALID\n");
+                                    //printf("INVALID4\n");
+                                    isInvalid = true;
                                     break;
                                 }
                             } else if (!isNumeric(tokens[tokenIndex])) {
-                                printf("INVALID\n");
+                                //printf("INVALID5\n");
+                                isInvalid = true;
                                 break;
                             }
                         }
@@ -975,6 +981,14 @@ void applySentence(char *sentence) {
                 newQuantities[i] = quantities[i] * subjIndex;
             }
 
+            for(int i = 0; i <subjIndex ; i++){
+                if(strcmp(subjects[i],sellerName[0]) == 0){
+                    isInvalid = true;
+                    printf("INVALID\n");
+                    break;
+                }
+            }
+
             if (!itemsExistPersonList(sellerName, items, newQuantities, 1, itemIndex)) {
                 return;
             }
@@ -1034,6 +1048,14 @@ void applySentence(char *sentence) {
                 newQuantities[i] = quantities[i] * subjIndex;
             }
 
+            for(int i = 0; i <subjIndex ; i++){
+                if(strcmp(subjects[i],buyerName[0]) == 0){
+                    isInvalid = true;
+                    printf("INVALID\n");
+                    break;
+                }
+            }
+
             if (!itemsExistPersonList(subjects, items, quantities, subjIndex, itemIndex)) {
                 return;
             }
@@ -1072,7 +1094,6 @@ void semanticAnalysis(char **sentences) {
         char *sentence = malloc(sizeof(char) * 1025);
         sentence = sentences[i];
 
-        // printf("sentence: %s\n", sentence);
 
         // hold the first and second letter of the sentence
         char *firstTwoLetters = malloc(sizeof(char) * 2);
@@ -1094,7 +1115,10 @@ void semanticAnalysis(char **sentences) {
                 sentenceIndex = ifIndex + 1;
             }
             if (onlyOnce) {
-                printf("OK\n");
+                if(!isInvalid) {
+                    printf("OK\n");
+                }
+                isInvalid = false;
                 onlyOnce = false;
             }
         }
@@ -1124,13 +1148,71 @@ void semanticAnalysis(char **sentences) {
             x++;
         }
         if (!isQuestion) {
-            printf("OK\n");
+            if(!isInvalid) {
+                printf("OK\n");
+            }
+            isInvalid = false;
         }
         else {
             isQuestion = false;
         }
     }
 
-    // printf("--------------------\n");
-    // printPersonList();
+    //printf("--------------------\n");
+    //printPersonList();
+}
+
+bool checkSyntax(char *sentence){
+    char *tokens[250];
+    int numTokens = 0;
+    char copySentence[300];
+    strcpy(copySentence, sentence);
+    char *token = strtok(copySentence, " ");
+    int i = 0;
+    while (token != NULL) {
+        tokens[i] = token;
+        token = strtok(NULL, " ");
+        i++;
+    }
+    numTokens = i;
+
+    if(strcmp(tokens[0], "if") == 0){
+        bool containsCondition = false;
+        for (int i = 0; i < numTokens; i++) {
+            if (isConditionWord(tokens[i])) {
+                containsCondition = true;
+                if(strcmp(tokens[i], "has") == 0){
+                    if ((strcmp(tokens[i+1], "less") == 0 || strcmp(tokens[i+1], "more") == 0) && i+1 < numTokens) {
+                        if (i+2 < numTokens && strcmp(tokens[i+2], "than") != 0) {
+                            return false;
+                        }else{
+                            if(i+3 < numTokens && !isNumeric(tokens[i+3])){
+                                return false;
+                            }
+                        }
+                    } else if (!isNumeric(tokens[i+1])) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return containsCondition;
+    }
+    else {
+        bool containsAction = false;
+        for (int i = 0; i < numTokens; i++) {
+            if (isActionWord(tokens[i])) {
+                containsAction = true;
+                if (strcmp(tokens[i], "buy") == 0 || strcmp(tokens[i], "sell") == 0) {
+                    if (!(i + 2 < numTokens && isNumeric(tokens[i + 1]) && !isNumeric(tokens[i + 2]))) {
+                        return false;
+                    }
+                    if (isNumeric(tokens[numTokens - 1])) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return containsAction;
+    }
 }
