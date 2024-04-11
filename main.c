@@ -40,9 +40,7 @@ int main() {
 
         bool syntaticallyTrue = true;
         for (int i = 0; parsedTokens[i] != NULL; i++) {
-            // printf("%s\n", parsedTokens[i]);
             if(!checkSyntax(parsedTokens[i])){
-                // printf("question sentences are regarded as invalid\n");
                 syntaticallyTrue = false;
                 break;
             }
@@ -62,7 +60,6 @@ int main() {
             continue;
         }
         if(syntaticallyTrue) {
-            // printf("enters syntacticlyTrue if\n");
             // check if the first token is "exit"
             if (numTokens == 1 && strcmp(parsedTokens[0], "exit") == 0) {
                 // free memory before exiting
