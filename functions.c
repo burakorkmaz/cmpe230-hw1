@@ -1066,6 +1066,8 @@ void semanticAnalysis(char **sentences) {
     bool isIfFound = false;
     bool doesIfExist = false;
 
+    bool onlyOnce = true;
+
     while (sentences[i] != NULL) {
         char *sentence = malloc(sizeof(char) * 1025);
         sentence = sentences[i];
@@ -1091,7 +1093,10 @@ void semanticAnalysis(char **sentences) {
                 }
                 sentenceIndex = ifIndex + 1;
             }
-            printf("OK\n");
+            if (onlyOnce) {
+                printf("OK\n");
+                onlyOnce = false;
+            }
         }
 
         if (isIfFound) {
@@ -1125,6 +1130,7 @@ void semanticAnalysis(char **sentences) {
             isQuestion = false;
         }
     }
+
     // printf("--------------------\n");
     // printPersonList();
 }
