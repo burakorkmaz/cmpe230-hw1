@@ -27,7 +27,7 @@ int main() {
         char buffer[1025];
         readTerminal(buffer, 1025);
 
-        char *tokens[100];
+        char *tokens[512];
         int numTokens;
         tokenize(buffer, " ", tokens, &numTokens);
 
