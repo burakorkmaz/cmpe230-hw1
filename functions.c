@@ -380,7 +380,7 @@ bool isIfTrue(char *ifSentence) {
 
                 else if (strcmp(conditionWord, "has") == 0) {
                     char code[10] = "1"; // this variable is a code to detect the type of the if condition
-                                        // set to 1 by default which states that it is "has" condition
+                    // set to 1 by default which states that it is "has" condition
                     if (strcmp(tokens[i + 1], "more") == 0 || strcmp(tokens[i + 1], "less") == 0) {
                         if(strcmp(tokens[i + 1], "more") == 0) {
                             strcpy(code, "2");
@@ -503,7 +503,7 @@ bool isIfTrue(char *ifSentence) {
         else if (conditionType == '2') {
             char *items[1024];
             int numItems = 0;
-            int quantity[1024]; 
+            int quantity[1024];
             for (int j = conditionWordIndex + 3; j < numTokens; j++) {
                 if (strcmp(tokens[j], "and") != 0) {
                     if (!isNumeric(tokens[j])) {
@@ -525,7 +525,7 @@ bool isIfTrue(char *ifSentence) {
         else if (conditionType == '3') {
             char *items[1024];
             int numItems = 0;
-            int quantity[1024]; 
+            int quantity[1024];
             for (int j = conditionWordIndex + 3; j < numTokens; j++) {
                 if (strcmp(tokens[j], "and") != 0) {
                     if (!isNumeric(tokens[j])) {
@@ -679,10 +679,11 @@ char **parsing(char *tokens[], int numTokens) {
             }
         }
         else if (strcmp(tokens[0], "who") == 0 && strcmp(tokens[1], "at") == 0) {
+            // printf("being written in who at case\n");
             printf("%s\n", whoAtLocation(tokens[2]));
+            // printf("being written is done\n");
         }
         else if(strcmp(tokens[numTokens -2], "total") == 0) {
-
             // printf("being written in total case\n");
             if(numTokens != 3){
                 printf("INVALID\n");
@@ -722,7 +723,7 @@ char **parsing(char *tokens[], int numTokens) {
 
                 sentences[sentenceIndex++] = strdup(sentence);
                 sentence[0] = '\0';
-            } 
+            }
             else if (strcmp(tokens[tokenIndex], "go") == 0) {
                 tokenIndex++;
 
@@ -922,6 +923,98 @@ bool itemsExistPersonList(char *names[], char *items[], int quantities[], int nu
     }
 
     return true;
+}
+
+bool containsNumericValue(char *str) {
+    for (int i = 0; i < strlen(str); i++) {
+        if (str[i] >= '0' && str[i] <= '9') {
+            return true;
+        }
+    }
+    return false;
+}
+
+// function to check if the people's names contain a number
+void checkIfNumeric(int *containsNumeric, char *sentence) {
+    int actionIndex = 0;
+    int start = 0;
+    int nextStart = 0;
+    int numTokens = 0;
+
+    char *tokens[250];
+    char *subjects[250];
+    int subjNum = 0;
+    int subjIndex = 0;
+
+    char *token = strtok(sentence, " ");
+    int i = 0;
+
+    while (token != NULL) {
+        tokens[i] = token;
+        token = strtok(NULL, " ");
+        i++;
+    }
+    numTokens = i;
+
+    findAction(tokens, &actionIndex, numTokens);
+    char *action = tokens[actionIndex];
+
+    int andCount = 0;
+    for(int i = 0; i < actionIndex ; i++){
+        if(strcmp(tokens[i], "and") != 0) {
+            subjects[subjIndex++] = tokens[i];
+            subjNum++;
+        }
+    }
+
+    for(int i = 0; i < subjIndex ; i++){
+        if(containsNumericValue(subjects[i])){
+            *containsNumeric = 1;
+            break;
+        }
+    }
+}
+
+// function to check if the same person exists in the given sentence
+void samePersonExists(int *samePerson, char *sentence) {
+    int actionIndex = 0;
+    int start = 0;
+    int nextStart = 0;
+    int numTokens = 0;
+
+    char *tokens[250];
+    char *subjects[250];
+    int subjNum = 0;
+    int subjIndex = 0;
+
+    char *token = strtok(sentence, " ");
+    int i = 0;
+
+    while (token != NULL) {
+        tokens[i] = token;
+        token = strtok(NULL, " ");
+        i++;
+    }
+    numTokens = i;
+
+    findAction(tokens, &actionIndex, numTokens);
+    char *action = tokens[actionIndex];
+
+    for(int i = 0; i < actionIndex ; i++){
+        if(strcmp(tokens[i], "and") != 0) {
+            subjects[subjIndex++] = tokens[i];
+            subjNum++;
+        }
+    }
+
+    for(int i = 0; i < subjIndex ; i++){
+        for(int j = 0; j < subjIndex ; j++){
+            if(strcmp(subjects[i], subjects[j]) == 0 && i != j){
+                *samePerson = 1;
+                break;
+            }
+        }
+    }
 }
 
 void applySentence(char *sentence) {
