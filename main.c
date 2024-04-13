@@ -10,6 +10,8 @@ void findAction(char *tokens[], int *start, int *nextStart, int *actionIndex, in
 char **parsing(char *tokens[], int numTokens);
 void semanticAnalysis(char **sentences);
 bool checkSyntax(char *sentence);
+void samePersonExists(int *samePerson, char *sentence);
+void checkIfNumeric(int *containsNumeric, char *sentence);
 
 int start = 0;
 int actionIndex = 0;
@@ -18,15 +20,22 @@ extern bool isQuestion;
 
 int main() {
     char *keywords[] = {
-        "NOBODY",
-        "NOTHING",
-        "NOWHERE"
+            "NOBODY",
+            "NOTHING",
+            "NOWHERE"
     };
 
     while (1) {
+        int samePerson = 0;
+        int containsNumeric = 0;
         bool doesContainKeyword = false;
         char buffer[1025];
         readTerminal(buffer, 1025);
+
+        if (strlen(buffer) == 0) {
+            printf("INVALID\n");
+            continue;
+        }
 
         char *tokens[512];
         int numTokens;
@@ -40,6 +49,7 @@ int main() {
 
         bool syntaticallyTrue = true;
         for (int i = 0; parsedTokens[i] != NULL; i++) {
+            //printf("%s\n", parsedTokens[i]);
             if(!checkSyntax(parsedTokens[i])){
                 syntaticallyTrue = false;
                 break;
@@ -59,6 +69,42 @@ int main() {
             printf("INVALID\n");
             continue;
         }
+
+        // check if the people's names contain numbers
+        // copying the parsedTokens to a new array because of the checkIfNumeric function
+        char **parsedTokensFirstCopy = (char **)malloc(sizeof(char *) * 512);
+        for (int i = 0; parsedTokens[i] != NULL; i++) {
+            parsedTokensFirstCopy[i] = (char *)malloc(sizeof(char) * 512);
+            strcpy(parsedTokensFirstCopy[i], parsedTokens[i]);
+        }
+
+        for (int i = 0; parsedTokensFirstCopy[i] != NULL; i++) {
+            if (containsNumeric) break;
+            checkIfNumeric(&containsNumeric, parsedTokensFirstCopy[i]);
+        }
+        if (containsNumeric) {
+            printf("INVALID\n");
+            continue;
+        }
+
+        // check for the same person but first copy the parsedTokens to a new array
+        // copying the parsedTokens to a new array because of the samePersonExists function
+        char **parsedTokensSecondCopy = (char **)malloc(sizeof(char *) * 512);
+        for (int i = 0; parsedTokens[i] != NULL; i++) {
+            parsedTokensSecondCopy[i] = (char *)malloc(sizeof(char) * 512);
+            strcpy(parsedTokensSecondCopy[i], parsedTokens[i]);
+        }
+
+        for (int i = 0; parsedTokensSecondCopy[i] != NULL; i++) {
+            if (samePerson) break;
+            samePersonExists(&samePerson, parsedTokensSecondCopy[i]);
+        }
+
+        if (samePerson) {
+            printf("INVALID\n");
+            continue;
+        }
+
         if(syntaticallyTrue) {
             // check if the first token is "exit"
             if (numTokens == 1 && strcmp(parsedTokens[0], "exit") == 0) {
@@ -71,7 +117,7 @@ int main() {
             }
             semanticAnalysis(parsedTokens);
         }
-        else{
+        else {
             printf("INVALID\n");
         }
     }
