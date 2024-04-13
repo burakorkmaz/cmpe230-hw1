@@ -679,11 +679,10 @@ char **parsing(char *tokens[], int numTokens) {
             }
         }
         else if (strcmp(tokens[0], "who") == 0 && strcmp(tokens[1], "at") == 0) {
-            // printf("being written in who at case\n");
             printf("%s\n", whoAtLocation(tokens[2]));
-            // printf("being written is done\n");
         }
         else if(strcmp(tokens[numTokens -2], "total") == 0) {
+
             // printf("being written in total case\n");
             if(numTokens != 3){
                 printf("INVALID\n");
@@ -728,7 +727,7 @@ char **parsing(char *tokens[], int numTokens) {
                 tokenIndex++;
 
                 if (strcmp(tokens[tokenIndex], "to") != 0) {
-                    printf("INVALID2\n");
+                    printf("INVALID\n");
                     isInvalid = true;
                     break;
                 }
@@ -791,7 +790,7 @@ char **parsing(char *tokens[], int numTokens) {
                             tokenIndex++;
 
                             if (isNumeric(tokens[tokenIndex])) {
-                                printf("INVALID3\n");
+                                printf("INVALID\n");
                                 isInvalid = true;
                                 break;
                             } else {
