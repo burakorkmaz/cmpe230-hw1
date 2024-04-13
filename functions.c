@@ -649,19 +649,34 @@ char **parsing(char *tokens[], int numTokens) {
                 int i = 0;
                 char **names = malloc(sizeof(char * ) * 1024);
                 int numPeople = 0;
+                int andCount = 0;
                 while(strcmp(tokens[i], "total") != 0){
                     if(strcmp(tokens[i], "and") != 0){
                         names[numPeople] = tokens[i];
                         numPeople++;
+                    }else{
+                        andCount++;
                     }
                     i++;
                 }
-                printf("%d\n", getTotalItem(names ,numPeople,tokens[numTokens -2]));
+                if(numPeople > 1){
+                    if(andCount + 1 != numPeople){
+                        printf("INVALID\n");
+                    }else{
+                        printf("%d\n", getTotalItem(names, numPeople, tokens[numTokens - 2]));
+                    }
+                }else {
+                    printf("%d\n", getTotalItem(names, numPeople, tokens[numTokens - 2]));
+                }
             }
         }
         else if (strcmp(tokens[numTokens -2], "where") == 0) {
             // printf("being written in where case\n");
-            printf("%s\n", whereIsTheSubject(tokens[0]));
+            if(numTokens != 3) {
+                printf("INVALID\n");
+            }else {
+                printf("%s\n", whereIsTheSubject(tokens[0]));
+            }
         }
         else if (strcmp(tokens[0], "who") == 0 && strcmp(tokens[1], "at") == 0) {
             // printf("being written in who at case\n");
@@ -670,7 +685,14 @@ char **parsing(char *tokens[], int numTokens) {
         }
         else if(strcmp(tokens[numTokens -2], "total") == 0) {
             // printf("being written in total case\n");
-            printf("%s\n", totalInventory(tokens[0]));
+            if(numTokens != 3){
+                printf("INVALID\n");
+            }else {
+                printf("%s\n", totalInventory(tokens[0]));
+            }
+        }
+        else{
+            printf("INVALID\n");
         }
     }
     else {
@@ -930,10 +952,21 @@ void applySentence(char *sentence) {
     findAction(tokens, &actionIndex, numTokens);
     char *action = tokens[actionIndex];
 
+    int andCount = 0;
     for(int i = 0; i < actionIndex ; i++){
         if(strcmp(tokens[i], "and") != 0) {
             subjects[subjIndex++] = tokens[i];
             subjNum++;
+        }else{
+            andCount++;
+        }
+    }
+
+    if(subjIndex > 1){
+        if(andCount+ 1 != subjIndex){
+            printf("INVALID\n");
+            isInvalid = true;
+            return;
         }
     }
 
