@@ -1,3 +1,7 @@
+/*
+ * READ FIRST main.c
+ * This file contains all the functions about syntax and semantics
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -52,7 +56,7 @@ typedef struct {
 typedef struct {
     char *name;
     Location location;
-    Item items[250];
+    Item items[1025];
     int numItems;
 } Person;
 
@@ -101,7 +105,7 @@ void findAction(char *tokens[], int *actionIndex, int numTokens) {
     }
 }
 
-Person personList[1024];
+Person personList[1025];
 
 void addItem(Person *p, char *item, int quantity) {
     p->items[p->numItems].name = item;
@@ -352,7 +356,7 @@ bool isIfTrue(char *ifSentence) {
     int conditionStart = 0;
     int conditionNum = 0;
 
-    char *tokens[100];
+    char *tokens[1025];
     int numTokens = 0;
     char *token = strtok(ifSentence, " ");
 
@@ -420,13 +424,6 @@ bool isIfTrue(char *ifSentence) {
         i++;
     }
 
-    /*
-    printf("Conditions: \n");
-    for (int i = 0; i < conditionIndex; i++) {
-        printf("Condition #%d: %s\n", i + 1, conditions[i]);
-    }
-    */
-
     for (int i = 0; i < conditionNum; i++) {
         char *condition = malloc(sizeof(char) * 1024);
         condition = conditions[i];
@@ -442,7 +439,7 @@ bool isIfTrue(char *ifSentence) {
 
         int conditionWordIndex = 0;
 
-        char *tokens[100];
+        char *tokens[1025];
         int numTokens = 0;
         char *token = strtok(condition, " ");
 
@@ -803,12 +800,19 @@ char **parsing(char *tokens[], int numTokens) {
                             if (strcmp(tokens[tokenIndex], "less") == 0 || strcmp(tokens[tokenIndex], "more") == 0) {
                                 tokenIndex++;
                                 if (strcmp(tokens[tokenIndex], "than") != 0) {
-                                    //printf("INVALID4\n");
+                                    //printf("INVALID\n");
                                     isInvalid = true;
                                     break;
                                 }
+                                else{
+                                    if(!isNumeric(tokens[tokenIndex + 1])){
+                                        //printf("INVALID\n");
+                                        isInvalid = true;
+                                        break;
+                                    }
+                                }
                             } else if (!isNumeric(tokens[tokenIndex])) {
-                                //printf("INVALID5\n");
+                                //printf("INVALID\n");
                                 isInvalid = true;
                                 break;
                             }
@@ -887,9 +891,6 @@ void indexOfTo(char **tokens, int *toIndex, int numTokens) {
     }
 }
 
-
-
-
 bool itemsExistPersonList(char *names[], char *items[], int quantities[], int numNames, int numItems) {
     for (int i = 0; i < numNames; i++) {
         bool personExist = false;
@@ -941,8 +942,8 @@ void checkIfNumeric(int *containsNumeric, char *sentence) {
     int nextStart = 0;
     int numTokens = 0;
 
-    char *tokens[250];
-    char *subjects[250];
+    char *tokens[1024];
+    char *subjects[1024];
     int subjNum = 0;
     int subjIndex = 0;
 
@@ -982,8 +983,8 @@ void samePersonExists(int *samePerson, char *sentence) {
     int nextStart = 0;
     int numTokens = 0;
 
-    char *tokens[250];
-    char *subjects[250];
+    char *tokens[1024];
+    char *subjects[1024];
     int subjNum = 0;
     int subjIndex = 0;
 
@@ -1023,13 +1024,13 @@ void applySentence(char *sentence) {
     int nextStart = 0;
     int numTokens = 0;
 
-    char *tokens[250];
-    char *subjects[250];
+    char *tokens[1024];
+    char *subjects[1024];
     int subjNum = 0;
     int subjIndex = 0;
-    char *items[250];
+    char *items[1024];
     int itemIndex = 0;
-    int quantities[250];
+    int quantities[1024];
     char *location;
     char *token = strtok(sentence, " ");
     int i = 0;
@@ -1101,7 +1102,7 @@ void applySentence(char *sentence) {
             }
 
             // multiply quantities with the number of subjects and create another array
-            int newQuantities[250];
+            int newQuantities[1024];
             for(int i = 0; i < itemIndex; i++){
                 newQuantities[i] = quantities[i] * subjIndex;
             }
@@ -1168,7 +1169,7 @@ void applySentence(char *sentence) {
             }
 
             // multiply quantities with the number of subjects and create another array
-            int newQuantities[250];
+            int newQuantities[1024];
             for(int i = 0; i < itemIndex; i++){
                 newQuantities[i] = quantities[i] * subjIndex;
             }
@@ -1288,9 +1289,9 @@ void semanticAnalysis(char **sentences) {
 }
 
 bool checkSyntax(char *sentence){
-    char *tokens[250];
+    char *tokens[1024];
     int numTokens = 0;
-    char copySentence[300];
+    char copySentence[1024];
     strcpy(copySentence, sentence);
     char *token = strtok(copySentence, " ");
     int i = 0;
